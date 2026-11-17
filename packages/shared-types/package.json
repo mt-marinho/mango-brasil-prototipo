@@ -1,0 +1,13 @@
+{
+  "name": "@totem-pdv/shared-types",
+  "version": "1.0.0",
+  "description": "Contratos, DTOs e tipos compartilhados entre Totem, Central e Fiscal",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Totem de Autoatendimento | Burger Tech</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; user-select: none; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    @keyframes pulse-attract {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+    .pulse-attract { animation: pulse-attract 2s infinite ease-in-out; }
+    .receipt-print {
+      animation: printSlideDown 1.2s ease-out forwards;
+    }
+    @keyframes printSlideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-[#070b12] text-white h-screen flex justify-center items-center overflow-hidden antialiased">
+
+  <!-- KIOSK CONTAINER (VERTICAL ASPECT 9:16 SIMULATOR) -->
+  <div class="relative w-full max-w-md h-full md:max-h-[920px] md:h-[920px] bg-[#0c1220] md:rounded-[36px] md:border-[10px] md:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
+    
+    <!-- TOP STATUS BAR & INACTIVITY TIMER -->
+    <div class="h-10 bg-slate-950 px-4 flex items-center justify-between text-[11px] font-mono text-slate-400 shrink-0 border-b border-slate-800/80 z-20">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="font-bold text-slate-300">TOTEM 01 (ENTRADA)</span>
+      </div>
+      <!-- Inactivity Countdown -->
+      <div id="inactivity-box" class="flex items-center gap-1.5 text-amber-400 font-bold hidden">
+        <span><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#timer"/></svg></span>
+        <span id="inactivity-timer">60s</span>
+      </div>
+      <a href="/" target="_blank" class="text-[10px] text-blue-400 hover:underline">Painel Central &rarr;</a>
+    </div>
+
+    <!-- VIEW 1: ATTRACT SCREEN (DESCANSO) -->
+    <div id="screen-attract" class="flex-1 flex flex-col items-center justify-between p-8 text-center bg-gradient-to-b from-[#0c1220] via-[#101930] to-[#070b12] cursor-pointer" onclick="startOrder()">
+      <div class="pt-8 space-y-2">
+        <div class="inline-flex p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-xl shadow-amber-500/10">
+          <svg class="w-12 h-12 fill-current inline-block" aria-hidden="true"><use href="/gitlab-icons.svg#food"/></svg>
+        </div>
+        <h1 class="text-3xl font-black tracking-tight text-white">BURGER TECH</h1>
+        <p class="text-xs font-mono text-amber-400 font-bold tracking-widest uppercase">Autoatendimento Gourmet</p>
+      </div>
+
+      <div class="space-y-4 my-auto">
+        <div class="w-64 h-64 mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-amber-500/30 relative">
+          <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80" alt="Smash Burger" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+            <span class="text-xs font-bold text-white">Sabor Incomparável & Ingredientes Frescos</span>
+          </div>
+        </div>
+
+        <div class="pulse-attract">
+          <div class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-sm uppercase tracking-wider shadow-xl shadow-amber-500/20">
+            <svg class="w-5 h-5 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#arrow-right"/></svg> Toque na tela para pedir
+          </div>
+        </div>
+      </div>
+
+      <div class="pb-4 text-[10px] text-slate-500 font-mono">
+        Emissão Fiscal NFC-e &bull; Pagamento no Pinpad Integrado
+      </div>
+    </div>
+
+    <!-- VIEW 2: MENU & CATALOG -->
+    <div id="screen-menu" class="flex-1 flex flex-col hidden overflow-hidden">
+      <!-- Category Tabs (Horizontal Scroll) -->
+      <div class="p-3 bg-slate-950/80 border-b border-slate-800/80 flex gap-2 overflow-x-auto shrink-0 text-xs font-bold" id="kiosk-categories">
+        <button onclick="filterKioskCategory('cat-1')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-amber-500 text-black shadow-sm shrink-0" data-cat="cat-1"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#food"/></svg> Hambúrgueres</button>
+        <button onclick="filterKioskCategory('cat-2')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-2"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#package"/></svg> Acompanhamentos</button>
+        <button onclick="filterKioskCategory('cat-3')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-3"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#tag"/></svg> Bebidas</button>
+        <button onclick="filterKioskCategory('cat-4')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-4"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#star"/></svg> Sobremesas</button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3" id="kiosk-products-grid">
+        <!-- Products populated via JS -->
+      </div>
+
+      <!-- Floating Bottom Cart Summary -->
+      <div class="p-3 bg-slate-950/95 border-t border-slate-800 flex items-center justify-between shrink-0 gap-3 z-10">
+        <div>
+          <span class="text-[10px] text-slate-400 block font-mono" id="kiosk-cart-count">0 ITENS NO PEDIDO</span>
+          <span class="text-xl font-black text-amber-400 font-mono" id="kiosk-cart-total">R$ 0,00</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="resetToAttract()" class="px-3 py-2 rounded-xl bg-slate-900 text-slate-400 text-xs font-semibold">
+            Cancelar
+          </button>
+          <button onclick="goToCheckout()" id="btn-kiosk-checkout" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 disabled:opacity-50" disabled>
+            <span>Pagar</span> &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: CHECKOUT & TEF PINPAD SIMULATOR -->
+    <div id="screen-checkout" class="flex-1 flex flex-col p-6 hidden justify-between bg-[#0c1220]">
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h2 class="text-base font-bold text-white">Como deseja pagar?</h2>
+          <button onclick="backToMenu()" class="text-xs text-slate-400 hover:text-white">&larr; Voltar</button>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-center">
+          <span class="text-xs text-slate-400 font-mono">TOTAL DO PEDIDO:</span>
+          <div class="text-3xl font-black text-amber-400 font-mono" id="checkout-total-val">R$ 38,90</div>
+        </div>
+
+        <!-- Payment Method Options -->
+        <div class="space-y-2 text-xs font-bold">
+          <button onclick="startTefSimulation('CREDIT_CARD')" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl text-info"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#credit-card"/></svg></span>
+              <div class="text-left">
+                <div class="text-white text-sm">Cartão de Crédito</div>
+                <div class="text-[10px] text-slate-400 font-normal">Aproxime ou insira no pinpad</div>
+              </div>
+            </div>
+            <span class="text-amber-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </button>
+
+          <button onclick="startTefSimulation('DEBIT_CARD')" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl text-info"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#credit-card"/></svg></span>
+              <div class="text-left">
+                <div class="text-white text-sm">Cartão de Débito</div>
+                <div class="text-[10px] text-slate-400 font-normal">Digite a senha de 4 dígitos</div>
+              </div>
+            </div>
+            <span class="text-amber-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </button>
+
+          <button onclick="startPixSimulation()" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl text-amber-400"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#bolt"/></svg></span>
+              <div class="text-left">
+                <div class="text-white text-sm">Pix Instantâneo</div>
+                <div class="text-[10px] text-slate-400 font-normal">Pague pelo app do seu banco</div>
+              </div>
+            </div>
+            <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TEF PINPAD INTERACTIVE MODAL OVERLAY -->
+      <div id="pinpad-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="w-72 bg-neutral-900 rounded-3xl border-4 border-neutral-700 p-5 space-y-4 shadow-2xl text-center">
+          <!-- Pinpad Small Display Screen -->
+          <div class="bg-emerald-950/80 border-2 border-emerald-600 rounded-xl p-3 text-emerald-400 font-mono text-xs space-y-1 shadow-inner">
+            <div class="text-[10px] text-emerald-500 uppercase tracking-widest" id="pinpad-step-title">TEF GERTEC PINPAD</div>
+            <div class="text-sm font-bold" id="pinpad-display">INSIRA O CARTÃO</div>
+            <div class="text-[10px] text-emerald-300" id="pinpad-sub">R$ 38,90</div>
+          </div>
+
+          <!-- Pinpad Visual Hardware Illustration -->
+          <div class="grid grid-cols-3 gap-2 text-xs font-mono font-bold text-neutral-300 px-3">
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">1</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">2</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">3</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">4</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">5</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">6</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">7</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">8</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">9</div>
+            <div class="p-2 rounded bg-red-900/60 text-red-300 border border-red-700">ANULA</div>
+            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">0</div>
+            <div class="p-2 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700">ENTRA</div>
+          </div>
+
+          <div class="text-[10px] text-neutral-500 font-mono">
+            Simulador de Hardware TEF 2PC
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: SUCCESS & PRINTED TICKET -->
+    <div id="screen-success" class="flex-1 flex flex-col items-center justify-between p-6 hidden bg-[#0c1220] overflow-y-auto">
+      <div class="text-center space-y-2 pt-4">
+        <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
+          <svg class="w-8 h-8 fill-current inline-block" aria-hidden="true"><use href="/gitlab-icons.svg#check"/></svg>
+        </div>
+        <h2 class="text-xl font-black text-white">PEDIDO CONFIRMADO!</h2>
+        <p class="text-xs text-slate-400">Retire seu comprovante e aguarde seu número no painel</p>
+      </div>
+
+      <!-- Ticket & NFC-e Receipt Virtual Print -->
+      <div class="w-full max-w-xs bg-white text-neutral-900 font-mono p-5 rounded-lg shadow-2xl space-y-3 text-xs receipt-print my-4">
+        <div class="text-center border-b border-dashed border-neutral-400 pb-2">
+          <div class="font-extrabold text-sm">BURGER TECH RESTAURANTE</div>
+          <div class="text-[10px] text-neutral-600">Autoatendimento Totem 01</div>
+        </div>
+
+        <div class="text-center py-2 bg-neutral-100 rounded border border-neutral-200">
+          <span class="text-[10px] text-neutral-500 block uppercase font-bold">SUA SENHA DE RETIRADA:</span>
+          <span class="text-4xl font-black text-black" id="success-ticket-number">#042</span>
+        </div>
+
+        <div class="text-[10px] space-y-0.5 border-b border-dashed border-neutral-400 pb-2" id="success-receipt-items">
+          <!-- Items printed -->
+        </div>
+
+        <div class="text-[10px] space-y-0.5">
+          <div class="flex justify-between font-bold">
+            <span>TOTAL PAGO:</span>
+            <span id="success-receipt-total">R$ 38,90</span>
+          </div>
+          <div class="flex justify-between text-neutral-600">
+            <span>NFC-e Autorizada:</span>
+            <span id="success-receipt-nfce">Série 1 &bull; Mod 65</span>
+          </div>
+        </div>
+
+        <div class="pt-2 text-center text-[9px] text-neutral-500 border-t border-dashed border-neutral-400">
+          Obrigado pela preferência!<br/>
+          Consulte o QR Code no verso para crédito fiscal.
+        </div>
+      </div>
+
+      <button onclick="resetToAttract()" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs shadow-lg uppercase tracking-wider">
+        Finalizar e Iniciar Novo Pedido
+      </button>
+    </div>
+
+    <!-- MODAL DE CUSTOMIZAÇÃO DE PRODUTO -->
+    <div id="customize-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 hidden">
+      <div class="bg-[#0f172a] border border-slate-800 rounded-t-3xl md:rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="font-extrabold text-sm text-white" id="cust-prod-name">Smash Bacon Supreme</h3>
+          <button onclick="closeCustomizeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+        </div>
+
+        <!-- Sizes (Tamanhos) -->
+        <div id="cust-sizes-box" class="space-y-1.5">
+          <label class="text-[11px] font-bold text-slate-400 uppercase font-mono">Escolha o Tamanho:</label>
+          <div class="space-y-1 text-xs" id="cust-sizes-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Additions (Adicionais) -->
+        <div id="cust-additions-box" class="space-y-1.5">
+          <label class="text-[11px] font-bold text-slate-400 uppercase font-mono">Turbine seu lanche (Adicionais):</label>
+          <div class="space-y-1.5 text-xs" id="cust-additions-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Bottom Add Button -->
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 block font-mono">TOTAL:</span>
+            <span class="text-base font-extrabold text-amber-400 font-mono" id="cust-total-calc">R$ 34,90</span>
+          </div>
+          <button onclick="confirmCustomizedProduct()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs shadow-md">
+            Adicionar ao Carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/totem.js"></script>
+</body>
+</html>
