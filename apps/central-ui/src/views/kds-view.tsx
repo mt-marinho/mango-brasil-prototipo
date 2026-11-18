@@ -161,7 +161,6 @@ export function KdsView({ data }: { data: CentralData }) {
         <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
           <div>
             <h2 id="kds-history-title" className="text-sm font-semibold">Histórico de pedidos</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Pedidos entregues e exemplos de demonstração.</p>
           </div>
           <span className="text-xs text-muted-foreground">{history.length} {history.length === 1 ? "pedido" : "pedidos"}</span>
         </div>
