@@ -30,7 +30,7 @@ const PAYMENTS: { method: PaymentMethod; label: string }[] = [
 
 function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: boolean }) {
   if (method === "PIX") {
-    return <img src="/pix-icons8.png" alt="" aria-hidden="true" className="size-5 shrink-0 dark:invert" />
+    return <img src="/pix.svg" alt="" aria-hidden="true" className="size-5 shrink-0 dark:invert" />
   }
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
