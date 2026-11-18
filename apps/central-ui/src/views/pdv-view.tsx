@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 
 import { GlIcon } from "@/components/gl-icon"
 import { Button } from "@/components/ui/button"
@@ -49,9 +49,11 @@ function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: bo
 export function PdvView({
   data,
   onSaleCompleted,
+  header,
 }: {
   data: CentralData
   onSaleCompleted: (order: Order) => void
+  header: ReactNode
 }) {
   const [category, setCategory] = useState("all")
   const [search, setSearch] = useState("")
@@ -136,8 +138,10 @@ export function PdvView({
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-5 lg:h-full lg:min-h-0 lg:flex-row">
-      <section aria-label="Produtos" className="flex min-w-0 flex-1 flex-col gap-4 lg:min-h-0">
+    <div className="pdv-scroll flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+      <section aria-label="Produtos" className="flex min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1">
+        {header}
+        <div className="flex flex-col gap-4 p-4 sm:p-6 lg:min-h-0 lg:flex-1">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Produtos</h1>
@@ -171,7 +175,7 @@ export function PdvView({
           ))}
         </div>
 
-        <div className="pdv-scroll grid flex-1 grid-cols-1 content-start gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="pdv-scroll grid grid-cols-1 content-start gap-3 sm:grid-cols-2 lg:flex-1 lg:overflow-y-auto lg:pr-1 xl:grid-cols-3">
           {products.length === 0 && <p className="col-span-full rounded-xl border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado. Tente outra busca ou categoria.</p>}
           {products.map((p) => (
             <div
@@ -200,9 +204,10 @@ export function PdvView({
             </div>
           ))}
         </div>
+        </div>
       </section>
 
-      <aside aria-label="Pedido do balcão" className="pdv-scroll flex w-full shrink-0 flex-col overflow-x-hidden overflow-y-auto rounded-xl border bg-card lg:min-h-0 lg:w-[380px]">
+      <aside aria-label="Pedido do balcão" className="pdv-scroll flex w-full shrink-0 flex-col overflow-x-hidden overflow-y-auto border-t bg-card lg:h-full lg:min-h-0 lg:w-[380px] lg:border-t-0 lg:border-l">
         <div className="flex items-start justify-between gap-4 border-b px-5 py-4">
           <div>
             <h2 className="text-base font-bold tracking-tight">Pedido do balcão</h2>

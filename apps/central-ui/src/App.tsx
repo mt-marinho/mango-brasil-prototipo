@@ -38,36 +38,33 @@ export default function App() {
   const openDanfe = (orderId: string) =>
     setDanfeOrder(data.orders.find((o) => o.id === orderId) ?? null)
 
+  const header = (
+    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+      <div className="flex min-w-0 items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 data-vertical:h-4" />
+        <h2 className="flex items-center gap-2 text-base font-bold">
+          <GlIcon name={current.icon} className="size-5 text-primary" />
+          {current.title}
+        </h2>
+      </div>
+      <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
+        onClick={() => void data.reload()}>
+        <GlIcon name="retry" />
+      </Button>
+    </header>
+  )
+
   return (
     <TooltipProvider>
       <SidebarProvider className="h-svh overflow-hidden">
         <AppSidebar activeTab={tab} onNavigate={(next) => { setTab(next); if (next === "cardapio" || next === "pdv") void data.reload() }} kdsPending={data.kdsOrders.length} theme={theme} onToggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />
         <SidebarInset className="min-w-0 overflow-hidden">
-          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ml-1" />
-              <Separator orientation="vertical" className="mr-2 data-vertical:h-4" />
-              <h2 className="flex items-center gap-2 text-base font-bold">
-                <GlIcon name={current.icon} className="size-5 text-primary" />
-                {current.title}
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs">
-              <Button
-                variant="outline"
-                size="icon"
-                title="Atualizar dados"
-                aria-label="Atualizar dados"
-                onClick={() => void data.reload()}
-              >
-                <GlIcon name="retry" />
-              </Button>
-            </div>
-          </header>
-
+          {tab === "pdv" ? (
+            <PdvView data={data} onSaleCompleted={setDanfeOrder} header={header} />
+          ) : <>
+          {header}
           <div className="flex-1 overflow-y-auto p-6">
-            {tab === "pdv" && <PdvView data={data} onSaleCompleted={setDanfeOrder} />}
             {tab === "kds" && <KdsView data={data} />}
             {tab === "caixa" && <CaixaView data={data} />}
             {tab === "overview" && <OverviewView data={data} onOpenDanfe={openDanfe} />}
@@ -77,6 +74,7 @@ export default function App() {
             {tab === "usuarios" && <UsuariosView />}
             {tab === "config" && <ConfigView />}
           </div>
+          </>}
         </SidebarInset>
       </SidebarProvider>
 
