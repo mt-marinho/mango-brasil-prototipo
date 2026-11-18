@@ -69,11 +69,12 @@ export default function App() {
         <SidebarInset className="min-w-0 overflow-hidden">
           {tab === "pdv" ? (
             <PdvView data={data} onSaleCompleted={setDanfeOrder} header={header} />
+          ) : tab === "caixa" ? (
+            <CaixaView data={data} modal={cashModal} onModalChange={setCashModal} header={header} />
           ) : <>
           {header}
           <div className="flex-1 overflow-y-auto px-6 pt-2 pb-6">
             {tab === "kds" && <KdsView data={data} />}
-            {tab === "caixa" && <CaixaView data={data} modal={cashModal} onModalChange={setCashModal} />}
             {tab === "overview" && <OverviewView data={data} onOpenDanfe={openDanfe} />}
             {tab === "cardapio" && <CardapioView data={data} />}
             {tab === "totens" && <TotensView data={data} />}
