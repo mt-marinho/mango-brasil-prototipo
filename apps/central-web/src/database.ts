@@ -340,7 +340,7 @@ export class Database {
       status: 'OPEN',
       openedAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
       initialCash: 150.00,
-      finalCalculatedCash: 150.00,
+      finalCalculatedCash: 167.80,
       movements: [
         {
           id: 'mov-1',
@@ -351,13 +351,33 @@ export class Database {
           operatorId: 'user-op1',
           operatorName: 'Lucas Atendente',
           createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+        },
+        {
+          id: 'mov-seed-sale-37', shiftId: 'shift-today', type: 'ORDER_PAYMENT', amount: 12.90,
+          description: 'Venda #037 - Dinheiro', operatorId: 'user-op1', operatorName: 'Lucas Atendente',
+          createdAt: new Date(Date.now() - 110 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'mov-seed-supply', shiftId: 'shift-today', type: 'SUPPLY', amount: 20.00,
+          description: 'Reforço de troco', operatorId: 'user-op1', operatorName: 'Lucas Atendente',
+          createdAt: new Date(Date.now() - 90 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'mov-seed-sale-38', shiftId: 'shift-today', type: 'ORDER_PAYMENT', amount: 34.90,
+          description: 'Venda #038 - Dinheiro', operatorId: 'user-op1', operatorName: 'Lucas Atendente',
+          createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'mov-seed-withdrawal', shiftId: 'shift-today', type: 'BLEED_SANGRIA', amount: 50.00,
+          description: 'Recolhimento para o cofre', operatorId: 'user-op1', operatorName: 'Lucas Atendente',
+          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
         }
       ],
       reconciliation: [
-        { method: 'CASH', systemCalculatedAmount: 150.00 },
-        { method: 'CREDIT_CARD', systemCalculatedAmount: 0.00 },
-        { method: 'DEBIT_CARD', systemCalculatedAmount: 0.00 },
-        { method: 'PIX', systemCalculatedAmount: 0.00 }
+        { method: 'CASH', systemCalculatedAmount: 167.80 },
+        { method: 'CREDIT_CARD', systemCalculatedAmount: 14.90 },
+        { method: 'DEBIT_CARD', systemCalculatedAmount: 15.90 },
+        { method: 'PIX', systemCalculatedAmount: 47.80 }
       ]
     }
   ];
@@ -387,6 +407,23 @@ export class Database {
   ];
 
   public orders: Order[] = [
+    ...([
+      { ticket: '037', productId: 'prod-1', name: 'Manga Limão & Sal', amount: 12.90, method: 'CASH' as const, minutes: 110 },
+      { ticket: '038', productId: 'prod-6', name: 'Combo Dupla Tropical', amount: 34.90, method: 'CASH' as const, minutes: 60 },
+      { ticket: '039', productId: 'prod-2', name: 'Manga Picante da Casa', amount: 15.90, method: 'DEBIT_CARD' as const, minutes: 45 },
+    ].map(({ ticket, productId, name, amount, method, minutes }): Order => {
+      const timestamp = new Date(Date.now() - minutes * 60 * 1000).toISOString();
+      return {
+        id: `ord-seed-${ticket}`, publicTicketNumber: ticket, origin: 'PDV_ASSISTIDO', shiftId: 'shift-today',
+        status: 'DELIVERED',
+        items: [{ id: `item-seed-${ticket}`, productId, productName: name, unitPrice: amount, quantity: 1,
+          totalPrice: amount, additions: [],
+          fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 } }],
+        subtotal: amount, discount: 0, total: amount,
+        payments: [{ id: `pay-seed-${ticket}`, method, amount, status: 'APPROVED', paidAt: timestamp }],
+        nfceStatus: 'NOT_EMITTED', createdAt: timestamp, updatedAt: timestamp,
+      };
+    })),
     {
       id: 'ord-101',
       publicTicketNumber: '040',
