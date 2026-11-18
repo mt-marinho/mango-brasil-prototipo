@@ -62,10 +62,8 @@ export function CardapioView({ data }: { data: CentralData }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold">Cardápio</h2>
-        <p className="text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
-      </div>
+      <div className="!mt-3 space-y-2">
+      <p className="text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed px-6 py-14 text-center">
           <p className="text-sm font-medium">Nenhum produto encontrado</p>
@@ -99,6 +97,7 @@ export function CardapioView({ data }: { data: CentralData }) {
           })}
         </div>
       )}
+      </div>
     </div>
   )
 }
