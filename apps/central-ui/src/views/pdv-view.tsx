@@ -14,13 +14,6 @@ interface CartLine {
   quantity: number
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  "cat-1": "food",
-  "cat-2": "package",
-  "cat-3": "tag",
-  "cat-4": "star",
-}
-
 const PAYMENTS: { method: PaymentMethod; label: string }[] = [
   { method: "CASH", label: "Dinheiro" },
   { method: "DEBIT_CARD", label: "Débito" },
@@ -61,6 +54,7 @@ export function PdvView({
   onSaleCompleted: (order: Order) => void
 }) {
   const [category, setCategory] = useState("all")
+  const [search, setSearch] = useState("")
   const [cart, setCart] = useState<CartLine[]>([])
   const [method, setMethod] = useState<PaymentMethod>("CASH")
   const [cashGiven, setCashGiven] = useState("")
@@ -69,8 +63,9 @@ export function PdvView({
 
   const products = useMemo(
     () =>
-      data.products.filter((p) => p.active && (category === "all" || p.categoryId === category)),
-    [data.products, category],
+      data.products.filter((p) => p.active && (category === "all" || p.categoryId === category)
+        && p.name.toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR"))),
+    [data.products, category, search],
   )
 
   const subtotal = cart.reduce((acc, l) => acc + l.quantity * l.product.basePrice, 0)
@@ -141,72 +136,76 @@ export function PdvView({
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-6 lg:h-full lg:flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-card px-5 py-4">
+    <div className="flex min-h-full flex-col gap-5 lg:h-full lg:min-h-0 lg:flex-row">
+      <section aria-label="Produtos" className="flex min-w-0 flex-1 flex-col gap-4 lg:min-h-0">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Frescor que tempera o dia</p>
-            <h1 className="mt-1 text-xl font-extrabold">Manga boa. Tempero brasileiro.</h1>
-            <p className="mt-1 text-xs text-muted-foreground">Clássica, picante ou agridoce: escolha o sabor do próximo pedido.</p>
+            <h1 className="text-xl font-bold tracking-tight">Produtos</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Selecione os itens para adicionar ao pedido.</p>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <GlIcon name="search" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input aria-label="Buscar produto" value={search} onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar produto" className="h-10 pl-9 text-sm" />
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <div className="pdv-scroll flex shrink-0 items-center gap-2 overflow-x-auto pb-1" aria-label="Categorias de produtos">
           <Button
-            size="sm"
-            variant={category === "all" ? "default" : "outline"}
+            variant={category === "all" ? "secondary" : "ghost"}
+            className={cn("h-10 px-3 text-sm", category === "all" && "bg-primary/15 text-foreground ring-1 ring-primary/50")}
+            aria-pressed={category === "all"}
             onClick={() => setCategory("all")}
           >
-            Todos os Itens
+            Todos
           </Button>
           {data.categories.map((c) => (
             <Button
               key={c.id}
-              size="sm"
-              variant={category === c.id ? "default" : "outline"}
+              variant={category === c.id ? "secondary" : "ghost"}
+              className={cn("h-10 px-3 text-sm", category === c.id && "bg-primary/15 text-foreground ring-1 ring-primary/50")}
+              aria-pressed={category === c.id}
               onClick={() => setCategory(c.id)}
             >
-              <GlIcon name={CATEGORY_ICONS[c.id] ?? "tag"} />
               {c.name}
             </Button>
           ))}
         </div>
 
-        <div className="grid flex-1 grid-cols-1 content-start gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="pdv-scroll grid flex-1 grid-cols-1 content-start gap-3 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3">
+          {products.length === 0 && <p className="col-span-full rounded-xl border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado. Tente outra busca ou categoria.</p>}
           {products.map((p) => (
             <div
               key={p.id}
-              className="group flex flex-col justify-between rounded-2xl border bg-card p-3 transition-colors hover:border-primary/50"
+              className="group flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40"
             >
               <div>
-                <div className="relative mb-2.5 h-40 overflow-hidden rounded-xl bg-background">
+                <div className="h-32 overflow-hidden bg-muted xl:h-36">
                   <img
                     src={p.imageUrl}
                     alt={p.name}
-                    className="size-full object-cover transition-transform group-hover:scale-105"
+                    className="size-full object-cover"
                   />
-                  <span className="absolute right-2 bottom-2 rounded-lg bg-black/80 px-2 py-0.5 font-mono text-xs font-extrabold text-primary">
-                    {brl(p.basePrice)}
-                  </span>
                 </div>
-                <h4 className="mb-1 text-xs leading-tight font-bold">{p.name}</h4>
-                <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
-                  {p.description}
-                </p>
+                <div className="space-y-1 px-4 pt-3">
+                  <h4 className="text-sm leading-snug font-semibold">{p.name}</h4>
+                  <p className="line-clamp-2 min-h-9 text-xs leading-[1.45] text-muted-foreground">{p.description}</p>
+                </div>
               </div>
-              <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => add(p)}>
-                <GlIcon name="plus" />
-                Adicionar ao Carrinho
-              </Button>
+              <div className="mt-auto flex items-center justify-between gap-2 px-4 pt-3 pb-4">
+                <span className="text-base font-bold tabular-nums">{brl(p.basePrice)}</span>
+                <Button variant="outline" className="h-9 px-3 text-xs font-semibold" onClick={() => add(p)} aria-label={"Adicionar " + p.name + " ao pedido"}>
+                  <GlIcon name="plus" /> Adicionar
+                </Button>
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <aside className="flex w-full shrink-0 flex-col overflow-hidden rounded-xl border bg-card lg:w-[380px]">
-        <div className="flex items-start justify-between gap-4 border-b px-5 py-5">
+      <aside aria-label="Pedido do balcão" className="pdv-scroll flex w-full shrink-0 flex-col overflow-x-hidden overflow-y-auto rounded-xl border bg-card lg:min-h-0 lg:w-[380px]">
+        <div className="flex items-start justify-between gap-4 border-b px-5 py-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Venda presencial</p>
-            <h3 className="mt-1 text-base font-bold tracking-tight">Pedido do balcão</h3>
+            <h2 className="text-base font-bold tracking-tight">Pedido do balcão</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {itemCount === 1 ? "1 item no pedido" : itemCount + " itens no pedido"}
             </p>
@@ -217,7 +216,7 @@ export function PdvView({
           </Button>
         </div>
 
-        <div className="flex min-h-36 flex-1 flex-col overflow-y-auto px-5 py-2">
+        <div className="pdv-scroll flex min-h-36 max-h-72 flex-1 flex-col overflow-y-auto overscroll-contain px-5 lg:min-h-[72px] lg:max-h-none" tabIndex={0} aria-label="Itens selecionados">
           {cart.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
               <div className="mb-3 flex size-10 items-center justify-center rounded-full border bg-muted/50 text-muted-foreground">
@@ -231,17 +230,17 @@ export function PdvView({
           ) : (
             <div className="divide-y">
               {cart.map((l) => (
-                <div key={l.product.id} className="flex items-start gap-3 py-4">
-                  <img src={l.product.imageUrl} alt="" className="size-12 shrink-0 rounded-md bg-muted object-cover" />
+                <div key={l.product.id} className="flex items-start gap-3 py-3.5">
+                  <img src={l.product.imageUrl} alt="" className="size-12 shrink-0 rounded-lg bg-muted object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{l.product.name}</p>
+                    <p className="text-sm leading-snug font-semibold">{l.product.name}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{brl(l.product.basePrice)} / unidade</p>
                     <div className="mt-2 flex items-center gap-1">
-                      <Button variant="outline" size="icon-xs" aria-label={"Diminuir quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, -1)}>
+                      <Button variant="outline" size="icon-sm" aria-label={"Diminuir quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, -1)}>
                         <GlIcon name="dash" />
                       </Button>
                       <span className="w-6 text-center text-xs font-semibold tabular-nums">{l.quantity}</span>
-                      <Button variant="outline" size="icon-xs" aria-label={"Aumentar quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, 1)}>
+                      <Button variant="outline" size="icon-sm" aria-label={"Aumentar quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, 1)}>
                         <GlIcon name="plus" />
                       </Button>
                     </div>
@@ -253,7 +252,7 @@ export function PdvView({
           )}
         </div>
 
-        <div className="space-y-5 border-t px-5 py-5">
+        <div className="space-y-4 border-t px-5 py-4">
           <div className="space-y-2.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
