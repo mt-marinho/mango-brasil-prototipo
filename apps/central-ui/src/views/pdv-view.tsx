@@ -59,6 +59,7 @@ export function PdvView({
   const [method, setMethod] = useState<PaymentMethod>("CASH")
   const [cashGiven, setCashGiven] = useState("")
   const [cpf, setCpf] = useState("")
+  const [showCpf, setShowCpf] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const products = useMemo(
@@ -69,11 +70,6 @@ export function PdvView({
   )
 
   const subtotal = cart.reduce((acc, l) => acc + l.quantity * l.product.basePrice, 0)
-  const ibpt = cart.reduce(
-    (acc, l) =>
-      acc + l.quantity * l.product.basePrice * ((l.product.fiscal?.aliquotaIbpt ?? 18) / 100),
-    0,
-  )
   const given = Number(cashGiven || 0)
   const change = given >= subtotal && subtotal > 0 ? given - subtotal : 0
   const itemCount = cart.reduce((total, line) => total + line.quantity, 0)
@@ -126,6 +122,7 @@ export function PdvView({
       setCart([])
       setCashGiven("")
       setCpf("")
+      setShowCpf(false)
       await data.reload()
       onSaleCompleted(order)
     } catch (err) {
@@ -217,7 +214,10 @@ export function PdvView({
           {cart.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
               <div className="mb-3 flex size-10 items-center justify-center rounded-full border bg-muted/50 text-muted-foreground">
-                <GlIcon name="doc-text" className="size-5" />
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                  <path d="M4 10h16l-1.3 8.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8L4 10Z" />
+                  <path d="m8 10 4-6 4 6M9 14v2.5M15 14v2.5" />
+                </svg>
               </div>
               <p className="text-sm font-semibold">Seu pedido está vazio</p>
               <p className="mt-1 max-w-52 text-xs leading-relaxed text-muted-foreground">
@@ -250,19 +250,9 @@ export function PdvView({
         </div>
 
         <div className="space-y-4 border-t px-5 py-4">
-          <div className="space-y-2.5 text-sm">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal</span>
-              <span className="tabular-nums">{brl(subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Tributos aproximados inclusos</span>
-              <span className="tabular-nums">{brl(ibpt)}</span>
-            </div>
-            <div className="flex items-center justify-between border-t pt-3">
-              <span className="font-semibold">Total a pagar</span>
-              <span className="text-xl font-bold tracking-tight tabular-nums">{brl(subtotal)}</span>
-            </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-semibold">Total a pagar</span>
+            <span className="text-xl font-bold tracking-tight tabular-nums">{brl(subtotal)}</span>
           </div>
 
           <div className="space-y-2">
@@ -298,11 +288,17 @@ export function PdvView({
           )}
 
           <div className="space-y-2">
-            <label htmlFor="customer-cpf" className="flex items-baseline gap-1 text-xs font-semibold">
-              <span>CPF na nota</span><span className="font-normal text-muted-foreground">(opcional)</span>
-            </label>
-            <Input id="customer-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)}
-              placeholder="Somente números" inputMode="numeric" className="h-10 text-sm" />
+            <button type="button" aria-expanded={showCpf} aria-controls={showCpf ? "customer-cpf-field" : undefined}
+              onClick={() => { setShowCpf(!showCpf); if (showCpf) setCpf("") }}
+              className="flex items-center gap-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+              <GlIcon name={showCpf ? "dash" : "plus"} />
+              {showCpf ? "Remover CPF da nota" : "Adicionar CPF na nota"}
+            </button>
+            {showCpf && <div id="customer-cpf-field" className="space-y-2">
+              <label htmlFor="customer-cpf" className="block text-xs font-semibold">CPF na nota</label>
+              <Input id="customer-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)}
+                placeholder="Somente números" inputMode="numeric" className="h-10 text-sm" />
+            </div>}
           </div>
 
           <Button size="lg" disabled={busy} onClick={finalize}
