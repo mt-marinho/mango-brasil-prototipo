@@ -407,6 +407,30 @@ export class Database {
   ];
 
   public orders: Order[] = [
+    ...Array.from({ length: 14 }, (_, index): Order => {
+      const day = new Date();
+      day.setDate(day.getDate() - index - 1);
+      day.setHours(12, 0, 0, 0);
+      const timestamp = day.toISOString();
+      const examples = [
+        { productId: 'prod-1', name: 'Manga Limão & Sal', price: 12.90, method: 'PIX' as const },
+        { productId: 'prod-2', name: 'Manga Picante da Casa', price: 15.90, method: 'CREDIT_CARD' as const },
+        { productId: 'prod-4', name: 'Suco de Manga Natural', price: 8, method: 'DEBIT_CARD' as const },
+        { productId: 'prod-6', name: 'Combo Dupla Tropical', price: 34.90, method: 'CASH' as const },
+      ];
+      const item = examples[index % examples.length];
+      const quantity = 2 + ((index * 3) % 7);
+      const total = Number((item.price * quantity).toFixed(2));
+      return {
+        id: `ord-historico-demo-${index}`, publicTicketNumber: `H${index + 1}`, origin: 'PDV_ASSISTIDO', shiftId: `shift-demo-${index}`,
+        status: 'DELIVERED', items: [{ id: `item-historico-demo-${index}`, productId: item.productId,
+          productName: item.name, unitPrice: item.price, quantity, totalPrice: total, additions: [],
+          fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 } }],
+        subtotal: total, discount: 0, total,
+        payments: [{ id: `pay-historico-demo-${index}`, method: item.method, amount: total, status: 'APPROVED', paidAt: timestamp }],
+        nfceStatus: 'NOT_EMITTED', createdAt: timestamp, updatedAt: timestamp,
+      };
+    }),
     ...([
       { ticket: '042', productId: 'prod-3', name: 'Manga Fogo Tropical', amount: 17.90, method: 'PIX' as const, minutes: 4 },
       { ticket: '043', productId: 'prod-5', name: 'Manga Agridoce', amount: 14.90, method: 'DEBIT_CARD' as const, minutes: 2 },

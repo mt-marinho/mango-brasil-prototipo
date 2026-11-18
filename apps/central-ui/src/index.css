@@ -59,7 +59,7 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: #dedf14;
+    --primary: #ffe600;
     --success: oklch(0.696 0.17 162.48);
     --info: oklch(0.623 0.214 259.8);
     --primary-foreground: #191a04;
@@ -81,7 +81,7 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: #dedf14;
+    --sidebar-primary: #ffe600;
     --sidebar-primary-foreground: #191a04;
     --sidebar-accent: #f3f3d2;
     --sidebar-accent-foreground: #555704;
@@ -96,7 +96,7 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: #151820;
     --popover-foreground: oklch(0.985 0 0);
-    --primary: #dedf14;
+    --primary: #ffe600;
     --primary-foreground: #191a04;
     --secondary: #21252f;
     --secondary-foreground: oklch(0.985 0 0);
@@ -109,24 +109,24 @@
     --info: #60a5fa;
     --border: #30343e;
     --input: #30343e;
-    --ring: #dedf14;
-    --chart-1: #dedf14;
+    --ring: #ffe600;
+    --chart-1: #ffe600;
     --chart-2: #34d399;
     --chart-3: #60a5fa;
     --chart-4: #22d3ee;
     --chart-5: #a78bfa;
     --sidebar: #101218;
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: #dedf14;
+    --sidebar-primary: #ffe600;
     --sidebar-primary-foreground: #191a04;
     --sidebar-accent: rgb(222 223 20 / 12%);
     --sidebar-accent-foreground: #e4e654;
     --sidebar-border: #30343e;
-    --sidebar-ring: #dedf14;
+    --sidebar-ring: #ffe600;
 }
 
 /* Em fundo claro, a versão escura mantém legíveis textos e ícones de destaque. */
-:root:not(.dark) .text-primary { color: #646600; }
+:root:not(.dark) .text-primary { color: #705d00; }
 
 @layer base {
   * {

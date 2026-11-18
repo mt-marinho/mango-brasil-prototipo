@@ -1,289 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Totem de Autoatendimento | Mango Brasil</title>
-  <link rel="icon" type="image/svg+xml" href="/mango-mark.svg">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme: { extend: { colors: { mango: { 400: "#e8e95c", 500: "#dedf14", 600: "#b9ba0c" } } } } };</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; user-select: none; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
-    @keyframes pulse-attract {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.85; }
-    }
-    .pulse-attract { animation: pulse-attract 2s infinite ease-in-out; }
-    .receipt-print {
-      animation: printSlideDown 1.2s ease-out forwards;
-    }
-    @keyframes printSlideDown {
-      from { transform: translateY(-100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .bg-slate-950, .bg-slate-950\/80, .bg-slate-950\/95 { background-color: #0b0d12; }
-    .bg-slate-900 { background-color: #151820; }
-    .bg-slate-800 { background-color: #252a34; }
-    .border-slate-800, .border-slate-800\/80 { border-color: #30343e; }
-    .text-slate-400 { color: #a1a7b3; }
-    .text-slate-300 { color: #d1d5db; }
-    </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8f4">
+  <title>Mango Brasil · Faça seu pedido</title>
+  <link rel="icon" href="/mango-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/totem.css">
+  <script src="/totem.js" defer></script>
 </head>
-<body class="bg-[#090b10] text-white h-screen flex justify-center items-center overflow-hidden antialiased">
+<body>
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></symbol>
+    <symbol id="i-pix" viewBox="0 0 24 24"><path d="M8 3.5h.6c.5 0 1 .2 1.4.6l1.5 1.5c.3.3.7.3 1 0L14 4.1c.4-.4.9-.6 1.4-.6h.6L13.7 1.2a2.4 2.4 0 0 0-3.4 0L8 3.5ZM16 20.5h-.6c-.5 0-1-.2-1.4-.6l-1.5-1.5c-.3-.3-.7-.3-1 0L10 19.9c-.4.4-.9.6-1.4.6H8l2.3 2.3a2.4 2.4 0 0 0 3.4 0l2.3-2.3ZM22.8 10.3l-4.1-4.1h-3.3a.7.7 0 0 0-.5.2l-1.5 1.5a2 2 0 0 1-2.8 0L9.1 6.4a.7.7 0 0 0-.5-.2H5.3l-4.1 4.1a2.4 2.4 0 0 0 0 3.4l4.1 4.1h3.3c.2 0 .4-.1.5-.2l1.5-1.5a2 2 0 0 1 2.8 0l1.5 1.5c.1.1.3.2.5.2h3.3l4.1-4.1a2.4 2.4 0 0 0 0-3.4Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0m-9 4a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r=".5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 .5-1 1-1 2m0 3h.01"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 3C8 2 2 8 6 16c8 4 14-2 14-13ZM4 21 15 10"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+  </defs></svg>
+  <div class="tablet-device">
+  <main class="kiosk" id="kiosk">
+    <header class="brand-header">
+      <div class="brand">MANGO BRASIL</div>
+    </header>
+    <div id="connection-notice" class="connection-notice" role="status" hidden></div>
+    <nav id="order-progress" class="progress" aria-label="Etapas do pedido" hidden>
+      <span data-step="menu"><b>1</b> Escolha</span><i></i><span data-step="cart"><b>2</b> Revise</span><i></i><span data-step="checkout"><b>3</b> Pague</span>
+    </nav>
 
-  <!-- KIOSK CONTAINER (VERTICAL ASPECT 9:16 SIMULATOR) -->
-  <div class="relative w-full max-w-md h-full md:max-h-[920px] md:h-[920px] bg-[#151820] md:rounded-[36px] md:border-[10px] md:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
-    
-    <!-- TOP STATUS BAR & INACTIVITY TIMER -->
-    <div class="h-10 bg-slate-950 px-4 flex items-center justify-between text-[11px] font-mono text-slate-400 shrink-0 border-b border-slate-800/80 z-20">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-green-400"></span>
-        <span class="font-bold text-slate-300">MANGO BRASIL · TOTEM 01</span>
+    <section id="screen-attract" class="screen attract" aria-labelledby="attract-title">
+      <div class="attract-photo"><img src="/images/manga-picante.png" alt="Manga fresca em palitos com limão e temperos"><span class="fresh-tag"><svg class="icon"><use href="#i-leaf"/></svg> Fresquinha. Feita pra você.</span></div>
+      <div class="attract-content"><span class="eyebrow">UM TOQUE DE FRESCOR NO SEU DIA</span><h1 id="attract-title">Sua manga.<br><em>Do seu jeito.</em></h1><p>Escolha seu sabor, capriche nos extras<br>e deixe o resto com a gente.</p>
+        <button class="button primary start-button" id="start-order">Começar meu pedido <svg class="icon"><use href="#i-arrow"/></svg></button>
+        <div class="accepted-payments"><svg class="icon"><use href="#i-pix"/></svg> Pix <span>•</span><svg class="icon"><use href="#i-card"/></svg> Crédito e débito</div>
       </div>
-      <!-- Inactivity Countdown -->
-      <div id="inactivity-box" class="flex items-center gap-1.5 text-mango-400 font-bold hidden">
-        <span><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#timer"/></svg></span>
-        <span id="inactivity-timer">60s</span>
+    </section>
+
+    <section id="screen-menu" class="screen" aria-labelledby="menu-title" hidden>
+      <div class="section-heading"><div><span class="eyebrow">FEITO NA HORA, DO SEU JEITO</span><h1 id="menu-title" tabindex="-1">O que vai ser hoje?</h1><p>Escolha um sabor para começar.</p></div><button class="icon-button" data-action="help" aria-label="Preciso de ajuda"><svg class="icon"><use href="#i-help"/></svg></button></div>
+      <nav class="categories" id="kiosk-categories" aria-label="Categorias do cardápio"></nav>
+      <div class="catalog-scroll"><div class="catalog-heading"><h2 id="category-title">Todos os sabores</h2><span id="product-count"></span></div><div class="products-grid" id="kiosk-products-grid" aria-live="polite"></div></div>
+      <footer class="order-footer"><div class="cart-summary"><span class="bag-count"><svg class="icon"><use href="#i-bag"/></svg><b id="cart-badge">0</b></span><div><span class="muted small" id="kiosk-cart-count">Seu pedido está vazio</span><strong id="kiosk-cart-total">R$ 0,00</strong></div></div><button class="button primary" id="btn-kiosk-checkout" disabled>Ver meu pedido <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
+    </section>
+
+    <section id="screen-cart" class="screen" aria-labelledby="cart-title" hidden>
+      <div class="section-heading"><div><button class="back-link" data-action="menu"><svg class="icon"><use href="#i-back"/></svg> Continuar escolhendo</button><h1 id="cart-title" tabindex="-1">Tudo do seu jeito?</h1><p>Confira os itens antes de continuar.</p></div><button class="icon-button" data-action="help" aria-label="Preciso de ajuda"><svg class="icon"><use href="#i-help"/></svg></button></div>
+      <div class="scroll-content cart-content"><div id="cart-items"></div><button class="button secondary add-more" data-action="menu"><svg class="icon"><use href="#i-plus"/></svg> Adicionar mais delícias</button><button class="text-button cancel-order" id="cancel-order"><svg class="icon"><use href="#i-trash"/></svg> Cancelar pedido</button></div>
+      <footer class="order-footer"><div class="footer-total"><span class="muted small">Total do pedido</span><strong id="cart-total">R$ 0,00</strong></div><button class="button primary" id="go-payment">Ir para pagamento <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
+    </section>
+
+    <section id="screen-checkout" class="screen" aria-labelledby="checkout-title" hidden>
+      <div class="section-heading"><div><button class="back-link" data-action="cart"><svg class="icon"><use href="#i-back"/></svg> Revisar meu pedido</button><h1 id="checkout-title" tabindex="-1">Como prefere pagar?</h1><p>Falta só um passo para matar a vontade.</p></div></div>
+      <div class="scroll-content payment-content"><div class="payment-summary"><span id="checkout-count"></span><strong id="checkout-total-val"></strong></div>
+        <fieldset class="payment-options"><legend class="eyebrow">FORMA DE PAGAMENTO</legend>
+          <label class="payment-option"><input type="radio" name="payment" value="PIX" checked><span class="payment-icon pix"><svg class="icon"><use href="#i-pix"/></svg></span><span><strong>Pix</strong><small>Pelo aplicativo do seu banco</small></span><span class="radio-mark"></span></label>
+          <label class="payment-option"><input type="radio" name="payment" value="CREDIT_CARD"><span class="payment-icon"><svg class="icon"><use href="#i-card"/></svg></span><span><strong>Cartão de crédito</strong><small>Aproxime ou insira na maquininha</small></span><span class="radio-mark"></span></label>
+          <label class="payment-option"><input type="radio" name="payment" value="DEBIT_CARD"><span class="payment-icon"><svg class="icon"><use href="#i-card"/></svg></span><span><strong>Cartão de débito</strong><small>Aproxime ou insira na maquininha</small></span><span class="radio-mark"></span></label>
+        </fieldset>
+        <p class="simulation-note">Este é um simulador. Nenhuma cobrança será realizada.</p>
+        <button class="text-button cancel-order" data-action="cancel-order"><svg class="icon"><use href="#i-trash"/></svg> Cancelar pedido</button>
       </div>
-      <a href="/" target="_blank" class="text-[10px] text-blue-400 hover:underline">Painel Central &rarr;</a>
-    </div>
+      <footer class="order-footer"><div class="footer-total"><span class="muted small">Total a pagar</span><strong id="payment-total"></strong></div><button class="button primary" id="pay-button">Continuar com Pix <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
+    </section>
 
-    <!-- VIEW 1: ATTRACT SCREEN (DESCANSO) -->
-    <div id="screen-attract" class="flex-1 flex flex-col items-center justify-between p-8 text-center bg-gradient-to-b from-[#151820] via-[#20232d] to-[#090b10] cursor-pointer" onclick="startOrder()">
-      <div class="pt-8 space-y-2">
-        <div class="inline-flex p-4 rounded-3xl bg-mango-500/10 border border-mango-500/30 shadow-xl shadow-mango-500/10">
-          <img src="/mango-mark.svg" alt="" class="w-16 h-16" />
-        </div>
-        <h1 class="text-3xl font-black tracking-tight text-white">MANGO BRASIL</h1>
-        <p class="text-xs font-mono text-mango-400 font-bold tracking-widest uppercase">Mangas fresquinhas, do seu jeito</p>
-      </div>
+    <section id="screen-success" class="screen result-screen" aria-labelledby="success-title" hidden>
+      <div class="result-content"><span class="result-icon"><svg class="icon"><use href="#i-check"/></svg></span><span class="eyebrow">AGORA É COM A GENTE</span><h1 id="success-title" tabindex="-1">Pedido confirmado!</h1><p>Já vamos preparar suas delícias.<br>Acompanhe sua senha no painel de retirada.</p><div class="ticket"><span>SUA SENHA</span><strong id="success-ticket-number"></strong><small>Retire no balcão quando for chamada</small></div><div class="receipt-summary" id="success-receipt-items"></div><div class="receipt-total"><span>Total do pedido</span><strong id="success-receipt-total"></strong></div></div>
+      <div class="result-footer"><button class="button primary" data-action="finish">Concluir <svg class="icon"><use href="#i-check"/></svg></button><p class="muted small" id="success-countdown"></p></div>
+    </section>
 
-      <div class="space-y-4 my-auto">
-        <div class="w-64 h-64 mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-mango-500/30 relative">
-          <img src="/images/manga-picante.png" alt="Manga fresquinha com limão e pimenta" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-            <span class="text-xs font-bold text-white">Manga, limão e uma explosão de sabor</span>
-          </div>
-        </div>
+    <section id="screen-pending" class="screen result-screen" aria-labelledby="pending-title" hidden>
+      <div class="result-content"><span class="result-icon pending"><svg class="icon"><use href="#i-clock"/></svg></span><h1 id="pending-title" tabindex="-1">Pedido salvo neste totem</h1><p>A conexão está instável. Vamos reenviar automaticamente quando ela voltar.</p><div class="pending-message">Ainda não temos uma senha de retirada.<br>Se precisar, peça ajuda no balcão.</div><p class="simulation-note">Pagamento demonstrativo. Nenhuma cobrança real.</p></div>
+      <div class="result-footer"><button class="button primary" id="retry-order">Consultar novamente <svg class="icon"><use href="#i-arrow"/></svg></button><button class="button secondary" data-action="finish">Voltar ao início</button></div>
+    </section>
+  </main>
 
-        <div class="pulse-attract">
-          <div class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-mango-500 to-mango-500 text-black font-black text-sm uppercase tracking-wider shadow-xl shadow-mango-500/20">
-            <svg class="w-5 h-5 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#arrow-right"/></svg> Toque na tela para pedir
-          </div>
-        </div>
-      </div>
-
-      <div class="pb-4 text-[10px] text-slate-500 font-mono">
-        Emissão Fiscal NFC-e &bull; Pagamento no Pinpad Integrado
-      </div>
-    </div>
-
-    <!-- VIEW 2: MENU & CATALOG -->
-    <div id="screen-menu" class="flex-1 flex flex-col hidden overflow-hidden">
-      <!-- Category Tabs (Horizontal Scroll) -->
-      <div class="p-3 bg-slate-950/80 border-b border-slate-800/80 flex gap-2 overflow-x-auto shrink-0 text-xs font-bold" id="kiosk-categories">
-        <button onclick="filterKioskCategory('cat-1')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-mango-500 text-black shadow-sm shrink-0" data-cat="cat-1"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#food"/></svg> Clássicas</button>
-        <button onclick="filterKioskCategory('cat-2')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-2"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#package"/></svg> Picantes</button>
-        <button onclick="filterKioskCategory('cat-3')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-3"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#tag"/></svg> Bebidas</button>
-        <button onclick="filterKioskCategory('cat-4')" class="kiosk-cat-pill px-3 py-2 rounded-xl bg-slate-900 text-slate-300 shrink-0 border border-slate-800" data-cat="cat-4"><svg class="w-4 h-4 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#star"/></svg> Combos</button>
-      </div>
-
-      <!-- Products Grid -->
-      <div class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3" id="kiosk-products-grid">
-        <!-- Products populated via JS -->
-      </div>
-
-      <!-- Floating Bottom Cart Summary -->
-      <div class="p-3 bg-slate-950/95 border-t border-slate-800 flex items-center justify-between shrink-0 gap-3 z-10">
-        <div>
-          <span class="text-[10px] text-slate-400 block font-mono" id="kiosk-cart-count">0 ITENS NO PEDIDO</span>
-          <span class="text-xl font-black text-mango-400 font-mono" id="kiosk-cart-total">R$ 0,00</span>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="resetToAttract()" class="px-3 py-2 rounded-xl bg-slate-900 text-slate-400 text-xs font-semibold">
-            Cancelar
-          </button>
-          <button onclick="goToCheckout()" id="btn-kiosk-checkout" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-mango-600 to-mango-500 hover:from-mango-500 hover:to-mango-400 text-black font-extrabold text-xs shadow-lg shadow-mango-500/20 flex items-center gap-1.5 disabled:opacity-50" disabled>
-            <span>Pagar</span> &rarr;
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 3: CHECKOUT & TEF PINPAD SIMULATOR -->
-    <div id="screen-checkout" class="flex-1 flex flex-col p-6 hidden justify-between bg-[#151820]">
-      <div class="space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <h2 class="text-base font-bold text-white">Como deseja pagar?</h2>
-          <button onclick="backToMenu()" class="text-xs text-slate-400 hover:text-white">&larr; Voltar</button>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-center">
-          <span class="text-xs text-slate-400 font-mono">TOTAL DO PEDIDO:</span>
-          <div class="text-3xl font-black text-mango-400 font-mono" id="checkout-total-val">R$ 14,90</div>
-        </div>
-
-        <!-- Payment Method Options -->
-        <div class="space-y-2 text-xs font-bold">
-          <button onclick="startTefSimulation('CREDIT_CARD')" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl text-info"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#credit-card"/></svg></span>
-              <div class="text-left">
-                <div class="text-white text-sm">Cartão de Crédito</div>
-                <div class="text-[10px] text-slate-400 font-normal">Aproxime ou insira no pinpad</div>
-              </div>
-            </div>
-            <span class="text-mango-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
-          </button>
-
-          <button onclick="startTefSimulation('DEBIT_CARD')" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl text-info"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#credit-card"/></svg></span>
-              <div class="text-left">
-                <div class="text-white text-sm">Cartão de Débito</div>
-                <div class="text-[10px] text-slate-400 font-normal">Digite a senha de 4 dígitos</div>
-              </div>
-            </div>
-            <span class="text-mango-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
-          </button>
-
-          <button onclick="startPixSimulation()" class="w-full p-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition-all group">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl text-mango-400"><svg class="w-7 h-7 fill-current inline-block align-[-0.15em]" aria-hidden="true"><use href="/gitlab-icons.svg#bolt"/></svg></span>
-              <div class="text-left">
-                <div class="text-white text-sm">Pix Instantâneo</div>
-                <div class="text-[10px] text-slate-400 font-normal">Pague pelo app do seu banco</div>
-              </div>
-            </div>
-            <span class="text-cyan-400 group-hover:translate-x-1 transition-transform">&rarr;</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- TEF PINPAD INTERACTIVE MODAL OVERLAY -->
-      <div id="pinpad-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="w-72 bg-neutral-900 rounded-3xl border-4 border-neutral-700 p-5 space-y-4 shadow-2xl text-center">
-          <!-- Pinpad Small Display Screen -->
-          <div class="bg-green-950/80 border-2 border-green-600 rounded-xl p-3 text-green-400 font-mono text-xs space-y-1 shadow-inner">
-            <div class="text-[10px] text-green-500 uppercase tracking-widest" id="pinpad-step-title">TEF GERTEC PINPAD</div>
-            <div class="text-sm font-bold" id="pinpad-display">INSIRA O CARTÃO</div>
-            <div class="text-[10px] text-green-300" id="pinpad-sub">R$ 14,90</div>
-          </div>
-
-          <!-- Pinpad Visual Hardware Illustration -->
-          <div class="grid grid-cols-3 gap-2 text-xs font-mono font-bold text-neutral-300 px-3">
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">1</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">2</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">3</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">4</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">5</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">6</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">7</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">8</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">9</div>
-            <div class="p-2 rounded bg-red-900/60 text-red-300 border border-red-700">ANULA</div>
-            <div class="p-2 rounded bg-neutral-800 border border-neutral-700">0</div>
-            <div class="p-2 rounded bg-green-900/60 text-green-300 border border-green-700">ENTRA</div>
-          </div>
-
-          <div class="text-[10px] text-neutral-500 font-mono">
-            Simulador de Hardware TEF 2PC
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 4: SUCCESS & PRINTED TICKET -->
-    <div id="screen-success" class="flex-1 flex flex-col items-center justify-between p-6 hidden bg-[#151820] overflow-y-auto">
-      <div class="text-center space-y-2 pt-4">
-        <div class="w-14 h-14 mx-auto rounded-full bg-green-500/20 border border-green-500/40 text-green-400 flex items-center justify-center">
-          <svg class="w-8 h-8 fill-current inline-block" aria-hidden="true"><use href="/gitlab-icons.svg#check"/></svg>
-        </div>
-        <h2 class="text-xl font-black text-white">PEDIDO CONFIRMADO!</h2>
-        <p class="text-xs text-slate-400">Retire seu comprovante e aguarde seu número no painel</p>
-      </div>
-
-      <!-- Ticket & NFC-e Receipt Virtual Print -->
-      <div class="w-full max-w-xs bg-white text-neutral-900 font-mono p-5 rounded-lg shadow-2xl space-y-3 text-xs receipt-print my-4">
-        <div class="text-center border-b border-dashed border-neutral-400 pb-2">
-          <div class="font-extrabold text-sm">MANGO BRASIL</div>
-          <div class="text-[10px] text-neutral-600">Autoatendimento Totem 01</div>
-        </div>
-
-        <div class="text-center py-2 bg-neutral-100 rounded border border-neutral-200">
-          <span class="text-[10px] text-neutral-500 block uppercase font-bold">SUA SENHA DE RETIRADA:</span>
-          <span class="text-4xl font-black text-black" id="success-ticket-number">#042</span>
-        </div>
-
-        <div class="text-[10px] space-y-0.5 border-b border-dashed border-neutral-400 pb-2" id="success-receipt-items">
-          <!-- Items printed -->
-        </div>
-
-        <div class="text-[10px] space-y-0.5">
-          <div class="flex justify-between font-bold">
-            <span>TOTAL PAGO:</span>
-            <span id="success-receipt-total">R$ 14,90</span>
-          </div>
-          <div class="flex justify-between text-neutral-600">
-            <span>NFC-e Autorizada:</span>
-            <span id="success-receipt-nfce">Série 1 &bull; Mod 65</span>
-          </div>
-        </div>
-
-        <div class="pt-2 text-center text-[9px] text-neutral-500 border-t border-dashed border-neutral-400">
-          Obrigado pela preferência!<br/>
-          Consulte o QR Code no verso para crédito fiscal.
-        </div>
-      </div>
-
-      <button onclick="resetToAttract()" class="w-full py-3 rounded-2xl bg-mango-500 hover:bg-mango-400 text-black font-extrabold text-xs shadow-lg uppercase tracking-wider">
-        Finalizar e Iniciar Novo Pedido
-      </button>
-    </div>
-
-    <!-- MODAL DE CUSTOMIZAÇÃO DE PRODUTO -->
-    <div id="customize-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 hidden">
-      <div class="bg-[#151820] border border-slate-800 rounded-t-3xl md:rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-          <h3 class="font-extrabold text-sm text-white" id="cust-prod-name">Manga Limão & Sal</h3>
-          <button onclick="closeCustomizeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
-        </div>
-
-        <!-- Sizes (Tamanhos) -->
-        <div id="cust-sizes-box" class="space-y-1.5">
-          <label class="text-[11px] font-bold text-slate-400 uppercase font-mono">Escolha sua porção:</label>
-          <div class="space-y-1 text-xs" id="cust-sizes-list">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <!-- Additions (Adicionais) -->
-        <div id="cust-additions-box" class="space-y-1.5">
-          <label class="text-[11px] font-bold text-slate-400 uppercase font-mono">Capriche no tempero (Adicionais):</label>
-          <div class="space-y-1.5 text-xs" id="cust-additions-list">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <!-- Bottom Add Button -->
-        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] text-slate-400 block font-mono">TOTAL:</span>
-            <span class="text-base font-extrabold text-mango-400 font-mono" id="cust-total-calc">R$ 12,90</span>
-          </div>
-          <button onclick="confirmCustomizedProduct()" class="px-5 py-2.5 rounded-xl bg-mango-500 hover:bg-mango-400 text-black font-extrabold text-xs shadow-md">
-            Adicionar ao Carrinho
-          </button>
-        </div>
-      </div>
-    </div>
-
+  <dialog id="customize-modal" class="dialog product-dialog" aria-labelledby="cust-prod-name">
+    <form id="customize-form"><div class="customize-scroll"><div class="customize-photo"><img id="cust-prod-image" alt=""><button type="button" class="icon-button close-dialog" data-close="customize-modal" aria-label="Fechar personalização"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="customize-body"><span class="eyebrow">UMA ESCOLHA DELICIOSA</span><h2 id="cust-prod-name"></h2><p id="cust-prod-description" class="muted"></p><fieldset id="cust-sizes-box"><legend>Escolha o tamanho <span class="optional">Escolha 1</span></legend><div id="cust-sizes-list" class="size-options"></div></fieldset><section id="cust-additions-box"><h3>Um toque a mais? <span class="optional">Opcional</span></h3><div id="cust-additions-list"></div></section></div></div><footer class="customize-footer"><div class="stepper"><button type="button" id="custom-qty-minus" aria-label="Diminuir quantidade"><svg class="icon"><use href="#i-minus"/></svg></button><output id="custom-quantity">1</output><button type="button" id="custom-qty-plus" aria-label="Aumentar quantidade"><svg class="icon"><use href="#i-plus"/></svg></button></div><button class="button primary" type="submit"><span>Adicionar</span><strong id="cust-total-calc"></strong><svg class="icon"><use href="#i-plus"/></svg></button></footer></form>
+  </dialog>
+  <dialog id="message-modal" class="dialog message-dialog" aria-labelledby="message-title"><span id="message-icon" class="message-icon"></span><h2 id="message-title"></h2><p id="message-description"></p><div class="dialog-actions"><button class="button primary" id="message-confirm">Continuar</button><button class="button secondary" id="message-secondary" hidden>Voltar</button></div></dialog>
+  <dialog id="payment-modal" class="dialog message-dialog" aria-labelledby="payment-title"><span class="message-icon" id="payment-illustration"></span><span class="eyebrow">PAGAMENTO DEMONSTRATIVO</span><h2 id="payment-title"></h2><p id="payment-description"></p><strong class="payment-modal-total" id="payment-modal-total"></strong><div id="payment-error" role="alert" hidden></div><div class="dialog-actions"><button class="button primary" id="approve-payment">Simular aprovação <svg class="icon"><use href="#i-check"/></svg></button><button class="button secondary" id="cancel-payment">Escolher outra forma</button></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
   </div>
-
-  <script src="/totem.js"></script>
 </body>
 </html>

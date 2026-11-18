@@ -47,7 +47,7 @@ export function CardapioView({ data }: { data: CentralData }) {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="!mb-2 flex flex-wrap items-center justify-between gap-4">
         <Tabs value={category} onValueChange={(value) => setCategory(String(value))} className="min-w-0 max-w-full">
           <div className="pdv-scroll max-w-full overflow-x-auto py-1">
             <TabsList aria-label="Categorias do cardápio" className="w-max justify-start gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
@@ -63,35 +63,36 @@ export function CardapioView({ data }: { data: CentralData }) {
       </div>
 
       <div className="!mt-0">
-      <p className="flex h-7 items-center text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
+      <p className="pb-3 text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed px-6 py-14 text-center">
           <p className="text-sm font-medium">Nenhum produto encontrado</p>
           <p className="mt-1 text-sm text-muted-foreground">Tente outra busca ou selecione outra categoria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((product) => {
-            const categoryName = data.categories.find((item) => item.id === product.categoryId)?.name
             return (
-              <article key={product.id} className="flex min-w-0 flex-col rounded-xl border bg-card p-4">
-                <div className="flex items-start gap-4">
-                  <img src={product.imageUrl} alt="" className="size-20 shrink-0 rounded-lg bg-background object-cover" />
-                  <div className="min-w-0 flex-1">
-                    {categoryName && <p className="text-xs text-muted-foreground">{categoryName}</p>}
-                    <h3 className="mt-1 text-sm leading-5 font-semibold">{product.name}</h3>
-                    <p className="mt-2 text-base font-semibold tabular-nums">{brl(product.basePrice)}</p>
-                  </div>
+              <article key={product.id} className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card">
+                <div className="relative h-32 overflow-hidden bg-muted xl:h-36">
+                  <img src={product.imageUrl} alt={product.name} className="size-full object-cover" />
+                  <Button variant="outline" size="icon" className="absolute top-2 right-2 bg-card" aria-label={`Editar ${product.name}`} onClick={() => alert("Edição de produtos ainda não implementada nesta versão.")}>
+                    <GlIcon name="pencil" />
+                  </Button>
                 </div>
-                <p className="mt-4 flex-1 text-xs leading-5 text-muted-foreground">{product.description}</p>
-                <div className="mt-4 flex items-center justify-between gap-3">
+                <div className="space-y-1 px-4 pt-3">
+                  <h3 className="text-sm leading-snug font-semibold">{product.name}</h3>
+                  <p className="line-clamp-2 min-h-9 text-xs leading-[1.45] text-muted-foreground">{product.description}</p>
+                </div>
+                <div className="px-4 pt-3 text-base font-bold tabular-nums">{brl(product.basePrice)}</div>
+                <div className="mt-auto flex items-center justify-between gap-3 px-4 pt-3 pb-4">
                   <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                     <GlIcon name={product.active ? "check-circle" : "pause"} className="size-4" />
                     {product.active ? "Disponível no cardápio" : "Indisponível no cardápio"}
                   </span>
                   <Switch checked={product.active} disabled={pending[product.id]} onCheckedChange={() => void toggle(product.id)} aria-label={`Disponibilidade de ${product.name}`} />
                 </div>
-                {errors[product.id] && <p role="alert" className="mt-3 text-xs text-destructive">{errors[product.id]}</p>}
+                {errors[product.id] && <p role="alert" className="px-4 pb-4 text-xs text-destructive">{errors[product.id]}</p>}
               </article>
             )
           })}

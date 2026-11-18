@@ -2,9 +2,7 @@ import { useEffect, useState } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { DanfeDialog } from "@/components/danfe-dialog"
-import { GlIcon } from "@/components/gl-icon"
 import { NAV_ITEMS, type TabId } from "@/components/nav-items"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -17,6 +15,7 @@ import { FiscalView } from "@/views/fiscal-view"
 import { KdsView } from "@/views/kds-view"
 import { OverviewView } from "@/views/overview-view"
 import { PdvView } from "@/views/pdv-view"
+import { PerfisView } from "@/views/perfis-view"
 import { TotensView } from "@/views/totens-view"
 import { UsuariosView } from "@/views/usuarios-view"
 
@@ -55,10 +54,6 @@ export default function App() {
           <h2 className="truncate text-sm leading-none font-medium text-foreground">{current.title}</h2>
         </nav>
       </div>
-      {tab !== "pdv" && tab !== "caixa" && tab !== "kds" && tab !== "cardapio" && <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
-        onClick={() => void data.reload()}>
-        <GlIcon name="retry" />
-      </Button>}
     </header>
   )
 
@@ -73,13 +68,14 @@ export default function App() {
             <CaixaView data={data} modal={cashModal} onModalChange={setCashModal} header={header} />
           ) : <>
           {header}
-          <div className={`flex-1 overflow-y-auto px-6 pt-2 pb-6 ${tab === "kds" ? "kds-scroll" : ""}`} tabIndex={tab === "kds" ? 0 : undefined}>
+          <div className={`flex-1 overflow-y-auto px-6 pt-2 pb-6 ${tab === "kds" ? "kds-scroll" : tab === "fiscal" ? "pdv-scroll" : ""}`} tabIndex={tab === "kds" ? 0 : undefined}>
             {tab === "kds" && <KdsView data={data} />}
             {tab === "overview" && <OverviewView data={data} onOpenDanfe={openDanfe} />}
             {tab === "cardapio" && <CardapioView data={data} />}
             {tab === "totens" && <TotensView data={data} />}
             {tab === "fiscal" && <FiscalView data={data} onOpenDanfe={openDanfe} />}
             {tab === "usuarios" && <UsuariosView />}
+            {tab === "perfis" && <PerfisView />}
             {tab === "config" && <ConfigView />}
           </div>
           </>}

@@ -90,6 +90,7 @@ export type PaymentMethodType = 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'CASH';
 
 export interface OrderPayment {
   id: string;
+  idempotency_key?: string; // UUID v7 da transação, preservado em reenvios.
   method: PaymentMethodType;
   amount: number;
   changeAmount?: number; // Para pagamentos em dinheiro
@@ -102,6 +103,7 @@ export interface OrderPayment {
 
 export interface Order {
   id: string;
+  idempotency_key?: string; // UUID v7 usado pelo totem para evitar pedidos duplicados.
   publicTicketNumber: string; // Senha sequencial do dia (ex: '042', 'A-12')
   origin: OrderOrigin;
   kioskId?: string;
@@ -118,6 +120,16 @@ export interface Order {
   clientCpf?: string; // Opcional para nota fiscal
   createdAt: string;
   updatedAt: string;
+}
+
+/** Contrato de criação utilizado pelo PDV e pelo simulador de autoatendimento. */
+export interface CreateOrderRequest {
+  idempotency_key?: string;
+  origin?: OrderOrigin;
+  kioskId?: string;
+  items: OrderItem[];
+  payments?: OrderPayment[];
+  clientCpf?: string;
 }
 
 // ==========================================

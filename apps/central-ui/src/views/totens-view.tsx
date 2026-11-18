@@ -1,80 +1,65 @@
 import { GlIcon } from "@/components/gl-icon"
-import { SectionHeader } from "@/components/page-header"
 import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import type { CentralData } from "@/lib/use-central-data"
 
-export function TotensView({ data }: { data: CentralData }) {
-  return (
-    <div className="space-y-4">
-      <SectionHeader
-        title="Parque de Totens & Periféricos"
-        description="Status dos quiosques, impressoras térmicas e pinpads"
-      >
-        <Button
-          className="bg-info font-bold text-black hover:bg-info/80"
-          render={<a href="/totem" target="_blank" rel="noreferrer" />}
-        >
-          <GlIcon name="tablet" /> Abrir Tela do Totem em Nova Aba
-          <GlIcon name="external-link" />
-        </Button>
-      </SectionHeader>
+const statusLabels: Record<string, string> = {
+  ONLINE: "Online", OFFLINE: "Offline", READY: "Pronta", CONNECTED: "Conectado",
+  DISCONNECTED: "Desconectado", ERROR: "Com erro", NOT_READY: "Indisponível",
+}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {data.totems.map((t) => (
-          <div key={t.id} className="space-y-3 rounded-2xl border bg-card p-5">
-            <div className="flex items-center justify-between border-b pb-2">
-              <div className="flex items-center gap-2">
-                <GlIcon name="tablet" className="size-6 text-muted-foreground" />
-                <div>
-                  <h4 className="text-sm font-bold">{t.name}</h4>
-                  <p className="font-mono text-[10px] text-muted-foreground">
-                    IP: {t.ipAddress} &bull; v{t.appVersion}
-                  </p>
+function DeviceStatus({ value }: { value: string }) {
+  const key = (value || "").toUpperCase()
+  const ok = ["ONLINE", "READY", "CONNECTED"].includes(key)
+  return <StatusBadge tone={ok ? "success" : "neutral"} icon={ok ? "check-circle" : "status_failed"} className="font-sans font-medium normal-case">{statusLabels[key] ?? (value || "Não informado")}</StatusBadge>
+}
+
+export function TotensView({ data }: { data: CentralData }) {
+  const online = data.totems.filter((t) => t.status?.toUpperCase() === "ONLINE").length
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Totens e periféricos</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Acompanhe a conexão dos totens e seus dispositivos.</p>
+        </div>
+        <Button render={<a href="/totem" target="_blank" rel="noreferrer" />}>
+          <GlIcon name="tablet" /> Abrir simulador <GlIcon name="external-link" />
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <span className="font-semibold">{data.totems.length} {data.totems.length === 1 ? "totem cadastrado" : "totens cadastrados"}</span>
+        <span className="flex items-center gap-1.5 text-muted-foreground"><GlIcon name="check-circle" className="text-success" /> {online} online</span>
+      </div>
+
+      {data.totems.length === 0 ? (
+        <div className="rounded-xl border border-dashed px-6 py-14 text-center text-sm text-muted-foreground">Nenhum totem cadastrado.</div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          {data.totems.map((t) => (
+            <article key={t.id} className="min-w-0 rounded-xl border bg-card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="text-sm font-semibold">{t.name}</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">{t.ipAddress} <span aria-hidden="true">·</span> v{t.appVersion}</p>
+                </div>
+                <DeviceStatus value={t.status} />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-3 border-t pt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Impressora</span>
+                  <DeviceStatus value={t.printerStatus} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Pinpad</span>
+                  <DeviceStatus value={t.pinpadStatus} />
                 </div>
               </div>
-              <StatusBadge tone="success" icon="status_success">
-                {t.status}
-              </StatusBadge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-              <div className="rounded-xl border bg-background p-2.5">
-                <span className="block text-[10px] text-muted-foreground">Impressora Térmica:</span>
-                <span className="flex items-center gap-1 font-bold text-success">
-                  <GlIcon name="check-circle" className="size-3" />
-                  {t.printerStatus}
-                </span>
-              </div>
-              <div className="rounded-xl border bg-background p-2.5">
-                <span className="block text-[10px] text-muted-foreground">Pinpad TEF:</span>
-                <span className="flex items-center gap-1 font-bold text-chart-4">
-                  <GlIcon name="credit-card" className="size-3" />
-                  {t.pinpadStatus}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-info/30 bg-info/10 text-info hover:bg-info/20"
-                render={<a href="/totem" target="_blank" rel="noreferrer" />}
-              >
-                Abrir Simulador
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => alert("Totem reiniciado remotamente com sucesso!")}
-              >
-                <GlIcon name="retry" /> Reiniciar
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

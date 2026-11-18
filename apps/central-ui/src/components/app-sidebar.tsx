@@ -87,17 +87,6 @@ export function AppSidebar({
               <span>{theme === "dark" ? "Tema escuro" : "Tema claro"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Abrir Totem Kiosk"
-              className="bg-info/15 font-bold text-info hover:bg-info/25 hover:text-info"
-              render={<a href="/totem" target="_blank" rel="noreferrer" />}
-            >
-              <GlIcon name="tablet" />
-              <span>Abrir Totem Kiosk</span>
-              <GlIcon name="external-link" className="ml-auto" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
         <NavUser user={{ name: "Lucas Atendente", role: "ATENDENTE (PDV)" }} />
       </SidebarFooter>

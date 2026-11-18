@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { db } from './database.js';
 import { FiscalEngineService } from '@totem-pdv/fiscal-engine';
-import { CashMovement, Order, OrderPayment, OrderStatus, Shift } from '@totem-pdv/shared-types';
+import { CashMovement, CreateOrderRequest, Order, OrderPayment, OrderStatus, Shift } from '@totem-pdv/shared-types';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -100,36 +100,52 @@ app.patch('/api/orders/:id/status', (req: Request, res: Response) => {
   res.json(order);
 });
 
-app.post('/api/orders', async (req: Request, res: Response) => {
-  const { items, payments, clientCpf, origin = 'TOTEM', kioskId } = req.body;
+// Same lifetime as the prototype's in-memory orders. Reserve the promise before
+// replying so concurrent retries cannot create two tickets or fiscal emissions.
+const kioskOrderSubmissions = new Map<string, { fingerprint: string; result: Promise<Order> }>();
 
-  if (!items || items.length === 0) {
+app.post('/api/orders', async (req: Request, res: Response) => {
+  const { items, payments, clientCpf, origin = 'TOTEM', kioskId } = req.body as CreateOrderRequest;
+
+  if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Pedido deve conter itens' });
   }
 
-  const subtotal = items.reduce((acc: number, item: any) => acc + item.totalPrice, 0);
-  const total = subtotal;
+  const idempotencyKey = req.body.idempotency_key;
+  if (idempotencyKey !== undefined && (typeof idempotencyKey !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey))) {
+    return res.status(400).json({ error: 'Chave de idempotência inválida' });
+  }
+  const fingerprint = JSON.stringify({ items, payments, clientCpf, origin, kioskId });
+  const existing = idempotencyKey ? kioskOrderSubmissions.get(idempotencyKey) : undefined;
+  if (existing && existing.fingerprint !== fingerprint) {
+    return res.status(409).json({ error: 'Chave já utilizada para outro pedido' });
+  }
 
-  const ticketNumber = db.nextTicketSequence.toString().padStart(3, '0');
-  db.nextTicketSequence += 1;
+  const createOrder = async (): Promise<Order> => {
+    const subtotal = items.reduce((acc: number, item: any) => acc + item.totalPrice, 0);
+    const total = subtotal;
 
-  const currentShift = db.shifts.find((s) => s.status === 'OPEN') || db.shifts[0];
+    const ticketNumber = db.nextTicketSequence.toString().padStart(3, '0');
+    db.nextTicketSequence += 1;
 
-  const newOrder: Order = {
-    id: `ord-${Date.now()}`,
-    publicTicketNumber: ticketNumber,
-    origin,
-    kioskId,
-    shiftId: currentShift.id,
-    status: 'RECEIVED',
-    items,
-    subtotal,
-    discount: 0,
-    total,
-    payments: payments || [],
-    clientCpf,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    const currentShift = db.shifts.find((s) => s.status === 'OPEN') || db.shifts[0];
+
+    const newOrder: Order = {
+      id: `ord-${idempotencyKey || Date.now()}`,
+      idempotency_key: idempotencyKey,
+      publicTicketNumber: ticketNumber,
+      origin,
+      kioskId,
+      shiftId: currentShift.id,
+      status: 'RECEIVED',
+      items,
+      subtotal,
+      discount: 0,
+      total,
+      payments: payments || [],
+      clientCpf,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
   };
 
   // Se o pagamento for em dinheiro no PDV assistido, registra movimento de caixa
@@ -175,7 +191,7 @@ app.post('/api/orders', async (req: Request, res: Response) => {
   if (origin === 'TOTEM') {
     notifyCockpit(
       'codex',
-      `Venda de R$ ${total.toFixed(2)} finalizada no Totem Kiosk (${payments[0]?.method}). Pedido #${ticketNumber} entrou na fila de preparo.`,
+      `Venda de R$ ${total.toFixed(2)} finalizada no Totem Kiosk (${payments?.[0]?.method}). Pedido #${ticketNumber} entrou na fila de preparo.`,
       'Totem Kiosk'
     );
   } else {
@@ -186,7 +202,17 @@ app.post('/api/orders', async (req: Request, res: Response) => {
     );
   }
 
-  res.status(201).json(newOrder);
+  return newOrder;
+  };
+
+  const result = existing?.result || createOrder();
+  if (idempotencyKey && !existing) kioskOrderSubmissions.set(idempotencyKey, { fingerprint, result });
+  try {
+    res.status(existing ? 200 : 201).json(await result);
+  } catch {
+    // Retain failed reservations: an ambiguous failure must not start a second sale.
+    res.status(500).json({ error: 'Não foi possível confirmar o pedido. Solicite atendimento.' });
+  }
 });
 
 // ==========================================

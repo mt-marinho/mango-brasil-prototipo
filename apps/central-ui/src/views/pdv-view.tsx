@@ -56,7 +56,7 @@ export function PdvView({
   const [category, setCategory] = useState("all")
   const [search, setSearch] = useState("")
   const [cart, setCart] = useState<CartLine[]>([])
-  const [method, setMethod] = useState<PaymentMethod>("CASH")
+  const [method, setMethod] = useState<PaymentMethod>("PIX")
   const [cashGiven, setCashGiven] = useState("")
   const [cpf, setCpf] = useState("")
   const [showCpf, setShowCpf] = useState(false)
