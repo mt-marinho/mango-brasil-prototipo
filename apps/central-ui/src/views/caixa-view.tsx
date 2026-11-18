@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import {
   Table,
   TableBody,
@@ -38,6 +39,7 @@ export function CaixaView({ data, modal, onModalChange }: {
   modal: CashModal
   onModalChange: (modal: CashModal) => void
 }) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const shift = data.shift
   const movements = shift?.movements ?? []
   const reconciled = (method: string) =>
@@ -75,9 +77,15 @@ export function CaixaView({ data, modal, onModalChange }: {
         </div>
 
           <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted-foreground">
-            <StatusBadge tone={shift ? "success" : "neutral"} icon={shift ? "check-circle" : "lock"} className="h-7 font-sans text-xs font-semibold">
-              {shift ? "Turno aberto" : "Turno fechado"}
-            </StatusBadge>
+            {shift ? (
+              <button type="button" onClick={() => setDetailsOpen(true)} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label="Ver detalhes do turno aberto">
+                <StatusBadge tone="success" icon="check-circle" className="h-7 cursor-pointer font-sans text-xs font-semibold hover:opacity-80">
+                  Turno aberto · Ver detalhes
+                </StatusBadge>
+              </button>
+            ) : (
+              <StatusBadge tone="neutral" icon="lock" className="h-7 font-sans text-xs font-semibold">Turno fechado</StatusBadge>
+            )}
             {opened && <span>Aberto em {opened}</span>}
             {opened && shift?.operatorName && <span aria-hidden="true">·</span>}
             {shift?.operatorName && <span>Operador: {shift.operatorName}</span>}
@@ -146,6 +154,47 @@ export function CaixaView({ data, modal, onModalChange }: {
         </Table>
       </section>
 
+      <Sheet open={detailsOpen && !!shift} onOpenChange={setDetailsOpen}>
+        <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
+          <SheetHeader className="border-b px-6 py-5 pr-14">
+            <SheetTitle className="text-lg font-semibold">Detalhes do caixa</SheetTitle>
+            <SheetDescription>Informações e movimentações do turno atual.</SheetDescription>
+          </SheetHeader>
+          {shift && <div className="flex-1 space-y-7 overflow-y-auto px-6 py-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">Turno atual</p>
+                <p className="mt-1 text-xs text-muted-foreground">{shift.terminalId || "Caixa balcão"}</p>
+              </div>
+              <StatusBadge tone="success" icon="check-circle" className="h-7 font-sans text-xs font-semibold">Turno aberto</StatusBadge>
+            </div>
+            <dl className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 text-sm">
+              <div><dt className="text-xs text-muted-foreground">Operador</dt><dd className="mt-1 font-medium">{shift.operatorName || "Não informado"}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Abertura</dt><dd className="mt-1 font-medium">{opened || "Não informada"}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Fundo inicial</dt><dd className="mt-1 font-medium tabular-nums">{brl(movements.find((m) => m.type === "INITIAL_SUPPLY")?.amount ?? 0)}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">Dinheiro em caixa</dt><dd className="mt-1 font-semibold tabular-nums">{brl(shift.finalCalculatedCash)}</dd></div>
+            </dl>
+            <section aria-labelledby="cash-details-payments">
+              <h3 id="cash-details-payments" className="text-sm font-semibold">Vendas por forma de pagamento</h3>
+              <div className="mt-3 space-y-3 text-sm">
+                {[
+                  ["Dinheiro", movements.filter((m) => m.type === "ORDER_PAYMENT").reduce((sum, m) => sum + m.amount, 0)],
+                  ["Pix", reconciled("PIX")],
+                  ["Cartão de crédito", reconciled("CREDIT_CARD")],
+                  ["Cartão de débito", reconciled("DEBIT_CARD")],
+                ].map(([label, amount]) => <div key={label} className="flex justify-between gap-4"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{brl(Number(amount))}</span></div>)}
+              </div>
+            </section>
+            <section aria-labelledby="cash-details-movements">
+              <div className="flex items-center justify-between gap-3"><h3 id="cash-details-movements" className="text-sm font-semibold">Movimentações</h3><span className="text-xs text-muted-foreground">{movements.length} {movements.length === 1 ? "registro" : "registros"}</span></div>
+              {movements.length ? <ul className="mt-2 divide-y">{movements.slice().reverse().map((movement) => {
+                const config = MOVEMENT_LABELS[movement.type] ?? { label: "Movimentação" }
+                return <li key={movement.id} className="flex justify-between gap-4 py-3 text-sm"><div className="min-w-0"><p className="font-medium">{config.label}</p><p className="mt-1 break-words text-xs text-muted-foreground">{movement.description}</p><p className="mt-1 text-xs text-muted-foreground">{new Date(movement.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {movement.operatorName}</p></div><span className="shrink-0 font-medium tabular-nums">{movement.type === "BLEED_SANGRIA" ? "−" : "+"} {brl(movement.amount)}</span></li>
+              })}</ul> : <p className="mt-3 text-sm text-muted-foreground">Ainda não há movimentações neste turno.</p>}
+            </section>
+          </div>}
+        </SheetContent>
+      </Sheet>
       <MovementDialog kind="sangria" open={modal === "sangria"} onClose={() => onModalChange(null)} onDone={data.reload} />
       <MovementDialog kind="suprimento" open={modal === "suprimento"} onClose={() => onModalChange(null)} onDone={data.reload} />
       <ClosingDialog open={modal === "fechamento"} onClose={() => onModalChange(null)} onDone={data.reload} />
