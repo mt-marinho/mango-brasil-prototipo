@@ -22,7 +22,7 @@ const PAYMENTS: { method: PaymentMethod; label: string }[] = [
   { method: "CASH", label: "Dinheiro" },
 ]
 
-const ACTIVE_CATEGORY_STYLE = "flex-none px-4 data-active:border-primary data-active:bg-primary/10 data-active:text-foreground dark:data-active:border-primary dark:data-active:bg-primary/10"
+const ACTIVE_CATEGORY_STYLE = "flex-none px-4 data-active:border-primary/50 data-active:bg-primary/10 data-active:text-foreground dark:data-active:border-primary/50 dark:data-active:bg-primary/10"
 
 function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: boolean }) {
   if (method === "CASH") {
@@ -262,7 +262,7 @@ export function PdvView({
                 <Button key={p.method} variant="outline" aria-pressed={method === p.method}
                   className={cn(
                     "h-15 flex-col gap-1.5 rounded-lg px-1 text-[11px] font-medium",
-                    method === p.method && "border-primary bg-primary/10 text-foreground hover:bg-primary/15 dark:border-primary dark:bg-primary/10",
+                    method === p.method && "border-primary/50 bg-primary/10 text-foreground hover:bg-primary/15 dark:border-primary/50 dark:bg-primary/10",
                   )}
                   onClick={() => setMethod(p.method)}>
                   <PaymentIcon method={p.method} selected={method === p.method} />
