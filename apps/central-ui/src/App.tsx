@@ -4,12 +4,10 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { DanfeDialog } from "@/components/danfe-dialog"
 import { GlIcon } from "@/components/gl-icon"
 import { NAV_ITEMS, type TabId } from "@/components/nav-items"
-import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { brl } from "@/lib/format"
 import { useCentralData } from "@/lib/use-central-data"
 import type { Order } from "@/lib/types"
 import { CaixaView } from "@/views/caixa-view"
@@ -53,19 +51,9 @@ export default function App() {
                 <GlIcon name={current.icon} className="size-5 text-primary" />
                 {current.title}
               </h2>
-              <StatusBadge tone="success" icon="status_success" className="ml-2 hidden md:inline-flex">
-                Terminal CAIXA-BALCAO-01
-              </StatusBadge>
             </div>
 
             <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-2 rounded-xl border bg-card px-3 py-1.5 font-mono">
-                <GlIcon name="scale" className="text-muted-foreground" />
-                <span className="text-muted-foreground">Saldo Caixa:</span>
-                <span className="font-bold text-success">
-                  {brl(data.shift?.finalCalculatedCash ?? 0)}
-                </span>
-              </div>
               <Button
                 variant="outline"
                 size="icon"

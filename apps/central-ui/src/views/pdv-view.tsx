@@ -149,10 +149,10 @@ export function PdvView({
               placeholder="Buscar produto" className="h-10 pl-9 text-sm" />
           </div>
         </div>
-        <div className="pdv-scroll flex shrink-0 items-center gap-2 overflow-x-auto pb-1" aria-label="Categorias de produtos">
+        <div className="pdv-scroll flex shrink-0 items-center gap-2 overflow-x-auto p-1" aria-label="Categorias de produtos">
           <Button
             variant={category === "all" ? "secondary" : "ghost"}
-            className={cn("h-10 px-3 text-sm", category === "all" && "bg-primary/15 text-foreground ring-1 ring-primary/50")}
+            className={cn("h-10 px-3 text-sm", category === "all" && "border-primary/50 bg-primary/15 text-foreground")}
             aria-pressed={category === "all"}
             onClick={() => setCategory("all")}
           >
@@ -162,7 +162,7 @@ export function PdvView({
             <Button
               key={c.id}
               variant={category === c.id ? "secondary" : "ghost"}
-              className={cn("h-10 px-3 text-sm", category === c.id && "bg-primary/15 text-foreground ring-1 ring-primary/50")}
+              className={cn("h-10 px-3 text-sm", category === c.id && "border-primary/50 bg-primary/15 text-foreground")}
               aria-pressed={category === c.id}
               onClick={() => setCategory(c.id)}
             >
