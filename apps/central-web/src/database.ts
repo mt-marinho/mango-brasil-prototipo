@@ -376,8 +376,8 @@ export class Database {
       reconciliation: [
         { method: 'CASH', systemCalculatedAmount: 167.80 },
         { method: 'CREDIT_CARD', systemCalculatedAmount: 14.90 },
-        { method: 'DEBIT_CARD', systemCalculatedAmount: 15.90 },
-        { method: 'PIX', systemCalculatedAmount: 47.80 }
+        { method: 'DEBIT_CARD', systemCalculatedAmount: 30.80 },
+        { method: 'PIX', systemCalculatedAmount: 65.70 }
       ]
     }
   ];
@@ -407,6 +407,22 @@ export class Database {
   ];
 
   public orders: Order[] = [
+    ...([
+      { ticket: '042', productId: 'prod-3', name: 'Manga Fogo Tropical', amount: 17.90, method: 'PIX' as const, minutes: 4 },
+      { ticket: '043', productId: 'prod-5', name: 'Manga Agridoce', amount: 14.90, method: 'DEBIT_CARD' as const, minutes: 2 },
+    ].map(({ ticket, productId, name, amount, method, minutes }): Order => {
+      const timestamp = new Date(Date.now() - minutes * 60 * 1000).toISOString();
+      return {
+        id: `ord-seed-${ticket}`, publicTicketNumber: ticket, origin: 'PDV_ASSISTIDO', shiftId: 'shift-today',
+        status: 'RECEIVED',
+        items: [{ id: `item-seed-${ticket}`, productId, productName: name, unitPrice: amount, quantity: 1,
+          totalPrice: amount, additions: [],
+          fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 } }],
+        subtotal: amount, discount: 0, total: amount,
+        payments: [{ id: `pay-seed-${ticket}`, method, amount, status: 'APPROVED', paidAt: timestamp }],
+        nfceStatus: 'NOT_EMITTED', createdAt: timestamp, updatedAt: timestamp,
+      };
+    })),
     ...([
       { ticket: '037', productId: 'prod-1', name: 'Manga Limão & Sal', amount: 12.90, method: 'CASH' as const, minutes: 110 },
       { ticket: '038', productId: 'prod-6', name: 'Combo Dupla Tropical', amount: 34.90, method: 'CASH' as const, minutes: 60 },
@@ -511,7 +527,7 @@ export class Database {
     }
   ];
 
-  public nextTicketSequence: number = 42;
+  public nextTicketSequence: number = 44;
 }
 
 export const db = new Database();
