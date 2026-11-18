@@ -154,3 +154,7 @@
 .pdv-scroll::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
 }
+
+/* A fila continua navegável sem exibir a barra de rolagem. */
+.kds-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.kds-scroll::-webkit-scrollbar { display: none; }

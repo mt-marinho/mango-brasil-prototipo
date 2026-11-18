@@ -3,8 +3,6 @@ import { useEffect, useState } from "react"
 import { GlIcon } from "@/components/gl-icon"
 import { ORDER_STATUS, StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { api } from "@/lib/api"
 import { elapsed } from "@/lib/format"
 import type { Order, OrderStatus } from "@/lib/types"
@@ -54,9 +52,6 @@ export function KdsView({ data }: { data: CentralData }) {
   const [pending, setPending] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [examples] = useState(exampleOrders)
-  const [historyDate, setHistoryDate] = useState("")
-  const [historyOrigin, setHistoryOrigin] = useState("")
-  const [historyStatus, setHistoryStatus] = useState("")
   const [, setClock] = useState(0)
 
   useEffect(() => {
@@ -84,14 +79,7 @@ export function KdsView({ data }: { data: CentralData }) {
   ].map((item) => ({ ...item, count: data.kdsOrders.filter((order) => order.status === item.status).length }))
   const history = [...data.orders.filter((order) => order.status === "DELIVERED"), ...examples]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  const filteredHistory = history.filter((order) => {
-    const date = new Date(order.createdAt)
-    const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-    const origin = ORIGINS[order.origin] ?? order.origin
-    return (!historyDate || localDate === historyDate) && (!historyOrigin || origin === historyOrigin) && (!historyStatus || order.status === historyStatus)
-  })
-  const historyOrigins = [...new Set(history.map((order) => ORIGINS[order.origin] ?? order.origin))]
-  const selectClass = "h-9 w-full rounded-lg border bg-background px-3 text-sm text-foreground"
+
 
   return (
     <div className="space-y-6">
@@ -172,15 +160,10 @@ export function KdsView({ data }: { data: CentralData }) {
       )}
       <section aria-labelledby="kds-history-title" className="space-y-4">
         <h2 id="kds-history-title" className="text-xl font-semibold tracking-tight">Histórico de pedidos</h2>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="w-full space-y-2 sm:w-44"><Label htmlFor="kds-history-date">Data do pedido</Label><Input id="kds-history-date" type="date" className="h-9" value={historyDate} onChange={(event) => setHistoryDate(event.target.value)} /></div>
-          <div className="w-full space-y-2 sm:w-52"><Label htmlFor="kds-history-origin">Origem</Label><select id="kds-history-origin" className={selectClass} value={historyOrigin} onChange={(event) => setHistoryOrigin(event.target.value)}><option value="">Todas as origens</option>{historyOrigins.map((origin) => <option key={origin} value={origin}>{origin}</option>)}</select></div>
-          <div className="w-full space-y-2 sm:w-44"><Label htmlFor="kds-history-status">Situação</Label><select id="kds-history-status" className={selectClass} value={historyStatus} onChange={(event) => setHistoryStatus(event.target.value)}><option value="">Todos os pedidos</option><option value="DELIVERED">Entregue</option></select></div>
-        </div>
         <div className="overflow-hidden rounded-xl border bg-card">
-        <div className="flex items-center justify-between border-b px-5 py-4"><h3 className="text-sm font-semibold">Pedidos registrados</h3><span className="text-xs text-muted-foreground">{filteredHistory.length} {filteredHistory.length === 1 ? "pedido" : "pedidos"}</span></div>
+        <div className="flex items-center justify-between border-b px-5 py-4"><h3 className="text-sm font-semibold">Pedidos registrados</h3><span className="text-xs text-muted-foreground">{history.length} {history.length === 1 ? "pedido" : "pedidos"}</span></div>
         <div className="divide-y">
-          {filteredHistory.map((order) => (
+          {history.map((order) => (
             <div key={order.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4">
               <div className="min-w-0">
                 <p className="text-sm font-semibold tabular-nums">#{order.publicTicketNumber} <span className="ml-2 text-xs font-normal text-muted-foreground">{ORIGINS[order.origin] ?? order.origin}{order.id.startsWith("kds-example-") ? " · Exemplo" : ""}</span></p>
@@ -192,7 +175,7 @@ export function KdsView({ data }: { data: CentralData }) {
               </div>
             </div>
           ))}
-          {filteredHistory.length === 0 && <p className="px-5 py-12 text-center text-sm text-muted-foreground">Nenhum pedido encontrado para os filtros selecionados.</p>}
+          {history.length === 0 && <p className="px-5 py-12 text-center text-sm text-muted-foreground">Nenhum pedido entregue ainda.</p>}
         </div>
         </div>
       </section>
