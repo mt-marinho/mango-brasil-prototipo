@@ -55,7 +55,7 @@ export default function App() {
           <h2 className="truncate text-sm leading-none font-medium text-foreground">{current.title}</h2>
         </nav>
       </div>
-      {tab !== "pdv" && tab !== "caixa" && <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
+      {tab !== "pdv" && tab !== "caixa" && tab !== "kds" && <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
         onClick={() => void data.reload()}>
         <GlIcon name="retry" />
       </Button>}

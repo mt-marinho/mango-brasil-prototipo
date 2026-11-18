@@ -29,6 +29,9 @@ export interface OrderItem {
   unitPrice: number
   quantity: number
   totalPrice: number
+  sizeName?: string
+  notes?: string
+  additions?: { additionId: string; name: string; quantity: number }[]
   fiscal?: ProductFiscal
 }
 
