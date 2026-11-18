@@ -9,158 +9,317 @@ import {
 
 export class Database {
   public categories: ProductCategory[] = [
-    { id: 'cat-1', name: 'Hambúrgueres Artesanais', slug: 'hamburgueres', order: 1, icon: 'burger', active: true },
-    { id: 'cat-2', name: 'Acompanhamentos', slug: 'acompanhamentos', order: 2, icon: 'fries', active: true },
-    { id: 'cat-3', name: 'Bebidas Geladas', slug: 'bebidas', order: 3, icon: 'cup', active: true },
-    { id: 'cat-4', name: 'Sobremesas', slug: 'sobremesas', order: 4, icon: 'icecream', active: true },
-  ];
+    {
+        "id": "cat-1",
+        "name": "Mangas Clássicas",
+        "slug": "mangas-classicas",
+        "order": 1,
+        "icon": "food",
+        "active": true
+    },
+    {
+        "id": "cat-2",
+        "name": "Mangas Picantes",
+        "slug": "mangas-picantes",
+        "order": 2,
+        "icon": "fire",
+        "active": true
+    },
+    {
+        "id": "cat-3",
+        "name": "Bebidas Naturais",
+        "slug": "bebidas-naturais",
+        "order": 3,
+        "icon": "tag",
+        "active": true
+    },
+    {
+        "id": "cat-4",
+        "name": "Combos para Compartilhar",
+        "slug": "combos",
+        "order": 4,
+        "icon": "package",
+        "active": true
+    }
+];
 
+  // Dados fiscais ilustrativos do protótipo em homologação; validar antes de uso real.
   public products: Product[] = [
     {
-      id: 'prod-1',
-      categoryId: 'cat-1',
-      name: 'Smash Bacon Supreme',
-      description: 'Pão brioche tostado na manteiga, 2x smash burger 100g, queijo cheddar derretido, fatias de bacon crocante e maionese defumada da casa.',
-      imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80',
-      basePrice: 34.90,
-      active: true,
-      availableInKiosk: true,
-      availableInPdv: true,
-      sizes: [
-        { id: 'size-1', name: 'Padrão (2x carnes 100g)', priceModifier: 0 },
-        { id: 'size-2', name: 'Monstruoso (3x carnes 100g)', priceModifier: 9.90 },
-      ],
-      additions: [
-        { id: 'add-1', name: 'Bacon Crocante Extra', price: 4.50, maxQuantity: 3 },
-        { id: 'add-2', name: 'Cheddar Inglês Extra', price: 4.00, maxQuantity: 2 },
-        { id: 'add-3', name: 'Cebola Caramelizada', price: 3.50, maxQuantity: 2 },
-      ],
-      fiscal: {
-        ncm: '2106.90.90',
-        cfop: '5.102',
-        origem: 0,
-        cstCsosn: '102',
-        aliquotaIcms: 0,
-        aliquotaIbpt: 18.45
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+        "id": "prod-1",
+        "categoryId": "cat-1",
+        "name": "Manga Limão & Sal",
+        "description": "Manga fresquinha em palitos, limão espremido na hora e uma pitada de sal. O clássico brasileiro que dá água na boca.",
+        "imageUrl": "/images/manga-classica.png",
+        "basePrice": 12.9,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [
+            {
+                "id": "size-1",
+                "name": "Copo 300 g",
+                "priceModifier": 0
+            },
+            {
+                "id": "size-2",
+                "name": "Bowl 500 g",
+                "priceModifier": 7
+            }
+        ],
+        "additions": [
+            {
+                "id": "add-1",
+                "name": "Limão extra",
+                "price": 1.5,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-2",
+                "name": "Mix de pimentas",
+                "price": 2,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-3",
+                "name": "Melado de cana",
+                "price": 2.5,
+                "maxQuantity": 2
+            }
+        ],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
     },
     {
-      id: 'prod-2',
-      categoryId: 'cat-1',
-      name: 'Classic Cheese Salada',
-      description: 'Pão brioche, burger artesanal 160g ao ponto, queijo prato especial, alface americana fresca, tomate italiano e molho especial.',
-      imageUrl: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80',
-      basePrice: 29.90,
-      active: true,
-      availableInKiosk: true,
-      availableInPdv: true,
-      sizes: [
-        { id: 'size-1', name: 'Individual', priceModifier: 0 },
-      ],
-      additions: [
-        { id: 'add-1', name: 'Bacon Crocante', price: 4.50, maxQuantity: 2 },
-        { id: 'add-4', name: 'Picles Artesanal', price: 2.50, maxQuantity: 2 },
-      ],
-      fiscal: {
-        ncm: '2106.90.90',
-        cfop: '5.102',
-        origem: 0,
-        cstCsosn: '102',
-        aliquotaIcms: 0,
-        aliquotaIbpt: 18.45
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+        "id": "prod-2",
+        "categoryId": "cat-2",
+        "name": "Manga Picante da Casa",
+        "description": "Palitos de manga com limão, páprica e mix de pimentas da casa. Ardência equilibrada e muito sabor.",
+        "imageUrl": "/images/manga-picante.png",
+        "basePrice": 15.9,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [
+            {
+                "id": "size-1",
+                "name": "Copo 300 g",
+                "priceModifier": 0
+            },
+            {
+                "id": "size-2",
+                "name": "Bowl 500 g",
+                "priceModifier": 7
+            }
+        ],
+        "additions": [
+            {
+                "id": "add-1",
+                "name": "Limão extra",
+                "price": 1.5,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-2",
+                "name": "Mix de pimentas",
+                "price": 2,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-3",
+                "name": "Melado de cana",
+                "price": 2.5,
+                "maxQuantity": 2
+            }
+        ],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
     },
     {
-      id: 'prod-3',
-      categoryId: 'cat-2',
-      name: 'Batata Rústica com Alecrim e Parmesão',
-      description: 'Batatas selecionadas cortadas rusticamente, fritas na hora, aromatizadas com alecrim fresco e finalizadas com lascas de queijo parmesão.',
-      imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80',
-      basePrice: 18.90,
-      active: true,
-      availableInKiosk: true,
-      availableInPdv: true,
-      sizes: [
-        { id: 'size-p', name: 'Média (200g)', priceModifier: 0 },
-        { id: 'size-g', name: 'Grande (350g)', priceModifier: 7.00 },
-      ],
-      additions: [
-        { id: 'add-cheddar-pot', name: 'Pote de Cheddar Cremoso', price: 5.00, maxQuantity: 2 },
-        { id: 'add-maionese', name: 'Maionese de Alho Negro', price: 4.00, maxQuantity: 2 },
-      ],
-      fiscal: {
-        ncm: '2004.10.00',
-        cfop: '5.102',
-        origem: 0,
-        cstCsosn: '102',
-        aliquotaIcms: 0,
-        aliquotaIbpt: 16.50
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+        "id": "prod-3",
+        "categoryId": "cat-2",
+        "name": "Manga Fogo Tropical",
+        "description": "Manga temperada com pimenta calabresa, páprica picante e limão. Para quem gosta de uma porção com mais atitude.",
+        "imageUrl": "/images/manga-picante.png",
+        "basePrice": 17.9,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [
+            {
+                "id": "size-1",
+                "name": "Copo 300 g",
+                "priceModifier": 0
+            },
+            {
+                "id": "size-2",
+                "name": "Bowl 500 g",
+                "priceModifier": 7
+            }
+        ],
+        "additions": [
+            {
+                "id": "add-1",
+                "name": "Limão extra",
+                "price": 1.5,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-2",
+                "name": "Mix de pimentas",
+                "price": 2,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-3",
+                "name": "Melado de cana",
+                "price": 2.5,
+                "maxQuantity": 2
+            }
+        ],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
     },
     {
-      id: 'prod-4',
-      categoryId: 'cat-3',
-      name: 'Refrigerante Lata 350ml',
-      description: 'Coca-Cola Original, Coca Zero, Guaraná Antarctica ou Sprite bem gelados.',
-      imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600&auto=format&fit=crop&q=80',
-      basePrice: 7.00,
-      active: true,
-      availableInKiosk: true,
-      availableInPdv: true,
-      sizes: [],
-      additions: [],
-      fiscal: {
-        ncm: '2202.10.00',
-        cest: '03.010.00',
-        cfop: '5.405',
-        origem: 0,
-        cstCsosn: '500', // Cobrado anteriormente por substituição tributária
-        aliquotaIcms: 0,
-        aliquotaIbpt: 24.20
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+        "id": "prod-4",
+        "categoryId": "cat-3",
+        "name": "Suco de Manga Natural",
+        "description": "Manga batida na hora com água e gelo. Sem adição de açúcar; peça do seu jeito. Copo de 400 ml.",
+        "imageUrl": "/images/mango-bebida.png",
+        "basePrice": 8,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [
+            {
+                "id": "size-400",
+                "name": "400 ml",
+                "priceModifier": 0
+            },
+            {
+                "id": "size-500",
+                "name": "500 ml",
+                "priceModifier": 2
+            }
+        ],
+        "additions": [],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
     },
     {
-      id: 'prod-5',
-      categoryId: 'cat-4',
-      name: 'Milkshake de Nutella com Ninho',
-      description: 'Sorvete cremoso batido com leite Ninho legítimo, calda generosa de Nutella e chantilly artesanal.',
-      imageUrl: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=600&auto=format&fit=crop&q=80',
-      basePrice: 22.00,
-      active: true,
-      availableInKiosk: true,
-      availableInPdv: true,
-      sizes: [
-        { id: 'size-400', name: '400 ml', priceModifier: 0 },
-        { id: 'size-500', name: '500 ml', priceModifier: 4.50 },
-      ],
-      additions: [
-        { id: 'add-chantilly', name: 'Chantilly Extra', price: 3.00, maxQuantity: 1 },
-      ],
-      fiscal: {
-        ncm: '2105.00.10',
-        cfop: '5.102',
-        origem: 0,
-        cstCsosn: '102',
-        aliquotaIcms: 0,
-        aliquotaIbpt: 19.10
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+        "id": "prod-5",
+        "categoryId": "cat-1",
+        "name": "Manga Agridoce",
+        "description": "O frescor da manga com limão e um toque de melado de cana. Uma combinação doce, cítrica e irresistível.",
+        "imageUrl": "/images/manga-classica.png",
+        "basePrice": 14.9,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [
+            {
+                "id": "size-1",
+                "name": "Copo 300 g",
+                "priceModifier": 0
+            },
+            {
+                "id": "size-2",
+                "name": "Bowl 500 g",
+                "priceModifier": 7
+            }
+        ],
+        "additions": [
+            {
+                "id": "add-1",
+                "name": "Limão extra",
+                "price": 1.5,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-2",
+                "name": "Mix de pimentas",
+                "price": 2,
+                "maxQuantity": 2
+            },
+            {
+                "id": "add-3",
+                "name": "Melado de cana",
+                "price": 2.5,
+                "maxQuantity": 2
+            }
+        ],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
+    },
+    {
+        "id": "prod-6",
+        "categoryId": "cat-4",
+        "name": "Combo Dupla Tropical",
+        "description": "Um copo de Manga Limão & Sal (300 g), um de Manga Picante da Casa (300 g) e um suco de manga de 400 ml para compartilhar.",
+        "imageUrl": "/images/mango-combo.png",
+        "basePrice": 34.9,
+        "active": true,
+        "availableInKiosk": true,
+        "availableInPdv": true,
+        "sizes": [],
+        "additions": [],
+        "fiscal": {
+            "ncm": "2106.90.90",
+            "cfop": "5.102",
+            "origem": 0,
+            "cstCsosn": "102",
+            "aliquotaIcms": 0,
+            "aliquotaIbpt": 18.45
+        },
+        "createdAt": new Date().toISOString(),
+        "updatedAt": new Date().toISOString()
     }
-  ];
+];
 
   public fiscalConfig: FiscalConfig = {
     cnpj: '12.345.678/0001-90',
-    razaoSocial: 'BURGER TECH RESTAURANTE LTDA',
-    nomeFantasia: 'BURGER TECH GOURMET',
+    razaoSocial: 'MANGO BRASIL ALIMENTOS LTDA',
+    nomeFantasia: 'MANGO BRASIL',
     inscricaoEstadual: '283749102',
     regimeTributario: 'SIMPLES_NACIONAL',
     cscId: '000001',
@@ -217,7 +376,7 @@ export class Database {
     },
     {
       id: 'totem-02',
-      name: 'Totem Salão Mezanino',
+      name: 'Totem Balcão Mango',
       ipAddress: '192.168.15.51',
       status: 'ONLINE',
       appVersion: '1.0.0',
@@ -239,22 +398,22 @@ export class Database {
         {
           id: 'item-1',
           productId: 'prod-1',
-          productName: 'Smash Bacon Supreme',
-          unitPrice: 34.90,
+          productName: 'Manga Limão & Sal',
+          unitPrice: 12.90,
           quantity: 1,
-          totalPrice: 38.90,
-          additions: [{ additionId: 'add-2', name: 'Cheddar Inglês Extra', price: 4.00, quantity: 1 }],
+          totalPrice: 14.90,
+          additions: [{ additionId: 'add-2', name: 'Mix de pimentas', price: 2.00, quantity: 1 }],
           fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 }
         }
       ],
-      subtotal: 38.90,
+      subtotal: 14.90,
       discount: 0,
-      total: 38.90,
+      total: 14.90,
       payments: [
         {
           id: 'pay-1',
           method: 'CREDIT_CARD',
-          amount: 38.90,
+          amount: 14.90,
           status: 'APPROVED',
           nsu: '984712',
           authorizationCode: '612849',
@@ -277,32 +436,32 @@ export class Database {
         {
           id: 'item-2',
           productId: 'prod-2',
-          productName: 'Classic Cheese Salada',
-          unitPrice: 29.90,
+          productName: 'Manga Picante da Casa',
+          unitPrice: 15.90,
           quantity: 2,
-          totalPrice: 59.80,
+          totalPrice: 31.80,
           additions: [],
           fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 }
         },
         {
           id: 'item-3',
           productId: 'prod-4',
-          productName: 'Refrigerante Lata 350ml',
-          unitPrice: 7.00,
+          productName: 'Suco de Manga Natural',
+          unitPrice: 8.00,
           quantity: 2,
-          totalPrice: 14.00,
+          totalPrice: 16.00,
           additions: [],
-          fiscal: { ncm: '2202.10.00', cfop: '5.405', origem: 0, cstCsosn: '500', aliquotaIcms: 0, aliquotaIbpt: 24.20 }
+          fiscal: { ncm: '2106.90.90', cfop: '5.102', origem: 0, cstCsosn: '102', aliquotaIcms: 0, aliquotaIbpt: 18.45 }
         }
       ],
-      subtotal: 73.80,
+      subtotal: 47.80,
       discount: 0,
-      total: 73.80,
+      total: 47.80,
       payments: [
         {
           id: 'pay-2',
           method: 'PIX',
-          amount: 73.80,
+          amount: 47.80,
           status: 'APPROVED',
           nsu: '512948',
           paidAt: new Date(Date.now() - 6 * 60 * 1000).toISOString()

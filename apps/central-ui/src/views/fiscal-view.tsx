@@ -26,7 +26,7 @@ export function FiscalView({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="space-y-2 rounded-2xl border bg-card p-4">
           <span className="text-xs font-bold text-muted-foreground uppercase">Certificado A1 &amp; CSC</span>
-          <div className="text-sm font-bold">BURGER TECH RESTAURANTE LTDA</div>
+          <div className="text-sm font-bold">MANGO BRASIL ALIMENTOS LTDA</div>
           <p className="font-mono text-[11px] text-success">CNPJ: 12.345.678/0001-90</p>
           <p className="font-mono text-[11px] text-muted-foreground">CSC Token: A1B2...CDEF (ID 000001)</p>
         </div>

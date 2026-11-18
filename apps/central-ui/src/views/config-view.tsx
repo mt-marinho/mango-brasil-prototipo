@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 const FIELDS = [
-  { label: "Razão Social:", value: "BURGER TECH RESTAURANTE LTDA" },
+  { label: "Razão Social:", value: "MANGO BRASIL ALIMENTOS LTDA" },
   { label: "CNPJ:", value: "12.345.678/0001-90" },
   { label: "Regime Tributário:", value: "Simples Nacional" },
   { label: "Ambiente SEFAZ:", value: "Homologação / Simulado", highlight: true },

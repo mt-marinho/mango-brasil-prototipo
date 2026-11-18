@@ -93,8 +93,8 @@ app.patch('/api/orders/:id/status', (req: Request, res: Response) => {
 
   notifyCockpit(
     'codex',
-    `Status do pedido #${order.publicTicketNumber} atualizado para "${status}" na fila KDS da cozinha.`,
-    'KDS Cozinha'
+    `Status do pedido #${order.publicTicketNumber} atualizado para "${status}" na fila KDS de preparo.`,
+    'KDS Preparo'
   );
 
   res.json(order);
@@ -175,7 +175,7 @@ app.post('/api/orders', async (req: Request, res: Response) => {
   if (origin === 'TOTEM') {
     notifyCockpit(
       'codex',
-      `Venda de R$ ${total.toFixed(2)} finalizada no Totem Kiosk (${payments[0]?.method}). Pedido #${ticketNumber} entrou na fila da cozinha.`,
+      `Venda de R$ ${total.toFixed(2)} finalizada no Totem Kiosk (${payments[0]?.method}). Pedido #${ticketNumber} entrou na fila de preparo.`,
       'Totem Kiosk'
     );
   } else {
@@ -352,7 +352,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.listen(PORT, () => {
   console.log(`=======================================================`);
-  console.log(`🍔 BURGER TECH - CENTRAL WEB & PDV ASSISTIDO`);
+  console.log(`🥭 MANGO BRASIL - CENTRAL WEB & PDV ASSISTIDO`);
   console.log(`👉 Painel Central: http://localhost:${PORT}`);
   console.log(`📱 Simulador Totem Kiosk: http://localhost:${PORT}/totem`);
   console.log(`=======================================================`);

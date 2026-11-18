@@ -1,6 +1,6 @@
-# 🍔 Burger Tech — Totem & PDV Central
+# 🥭 Mango Brasil — Totem & PDV Central
 
-Sistema completo e omnicanal de autoatendimento (Totem Kiosk) e gestão de frente de caixa (PDV Assistido, KDS de Cozinha, Fechamento Cego de Turnos e Motor Fiscal NFC-e), arquitetado em monorepo pnpm para alta performance, robustez e conformidade fiscal.
+Protótipo da **Mango Brasil**, estabelecimento de mangas temperadas. Sistema de autoatendimento (Totem Kiosk) e gestão de frente de caixa (PDV Assistido, KDS de Preparo, Fechamento Cego de Turnos e Motor Fiscal NFC-e), arquitetado em monorepo pnpm para alta performance, robustez e conformidade fiscal.
 
 ---
 
@@ -24,12 +24,12 @@ totem-pdv-central/
 ## 🚀 Funcionalidades Principais
 
 ### 1. 🖥️ PDV Assistido & Caixa (Balcão)
-- **Catálogo Interativo:** Seleção rápida por categorias (Burgers, Acompanhamentos, Bebidas, Sobremesas, Combos).
+- **Catálogo Interativo:** Seleção rápida por categorias (Mangas Clássicas, Mangas Picantes, Bebidas Naturais e Combos).
 - **Calculadora de Troco em Tempo Real:** Digitação do valor recebido em dinheiro com cálculo instantâneo do troco e bloqueio em caso de valor insuficiente.
 - **Formas de Pagamento:** Suporte a Dinheiro, Cartão de Crédito/Débito (TEF) e Pix instantâneo.
-- **Despacho Automático:** Pedidos finalizados geram documento fiscal e caem imediatamente na fila da cozinha.
+- **Despacho Automático:** Pedidos finalizados geram documento fiscal e caem imediatamente na fila de preparo.
 
-### 2. 👨‍🍳 KDS (Kitchen Display System — Cozinha)
+### 2. 👨‍🍳 KDS (Kitchen Display System — Preparo)
 - **Fila de Pedidos em Tempo Real:** Atualização automática sem necessidade de recarregar a página.
 - **Esteira de Produção:** Transição de status em 1 clique: `RECEBIDO` ➔ `PREPARANDO` ➔ `PRONTO` ➔ `ENTREGUE`.
 - **Filtros e Contadores:** Métricas de pedidos pendentes, em preparo e finalizados.
@@ -49,7 +49,7 @@ totem-pdv-central/
 
 ### 5. 📱 Totem Touchscreen Kiosk (Autoatendimento)
 - **Tela de Atração Dinâmica:** Vídeo promocional/banner de boas-vindas touch.
-- **Personalização de Itens:** Modal para escolha de ponto da carne, pão, molhos e adicionais extras.
+- **Personalização de Itens:** Modal para escolha de porção de manga, limão, mix de pimentas e melado de cana.
 - **Simulador Interativo de Pinpad TEF:** Etapas visuais de transação (Insira o cartão ➔ Processando ➔ Senha ➔ Aprovado).
 - **Animação de Impressão:** Emissão visual do cupom com senha do pedido e DANFE simplificado.
 - **Timer de Inatividade (Safety Kiosk):** Contagem regressiva de 60 segundos com retorno automático para a tela de atração em caso de abandono.
@@ -66,7 +66,7 @@ totem-pdv-central/
 
 ### Pré-requisitos
 - **Node.js** (v18 ou superior)
-- **pnpm** (`npm install -g pnpm`)
+- **pnpm** (`npm.cmd install -g pnpm@10`)
 - **Flutter SDK** (opcional, para compilação nativa do Totem App)
 
 ### Instalação de Dependências
@@ -117,4 +117,18 @@ flutter run -d chrome # ou -d windows
 ---
 
 ## 📄 Licença
-Distribuído sob licença proprietária para uso no projeto **Burger Tech / Mango Brasil**.
+Distribuído sob licença proprietária para uso no projeto **Mango Brasil**.
+
+
+## Cardápio demonstrativo Mango Brasil
+
+- Manga Limão & Sal — R$ 12,90
+- Manga Picante da Casa — R$ 15,90
+- Manga Fogo Tropical — R$ 17,90
+- Manga Agridoce — R$ 14,90
+- Suco de Manga Natural (400 ml) — R$ 8,00
+- Combo Dupla Tropical — R$ 34,90
+
+Porções de manga: copo de 300 g ou bowl de 500 g (+ R$ 7,00). Adicionais: limão, mix de pimentas e melado de cana. Catálogo, preços, identificação empresarial e parâmetros fiscais são dados ilustrativos de homologação.
+
+As fotos ilustrativas foram geradas com a ferramenta de imagens integrada e ficam em apps/central-web/public/images. Prompts: fotografias de catálogo de manga em palitos com limão e sal; manga com pimenta e páprica; suco de manga com gelo; combo com duas porções e um suco. Fundo creme, folhas tropicais, luz natural, sem rótulos.

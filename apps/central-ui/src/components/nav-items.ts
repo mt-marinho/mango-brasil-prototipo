@@ -11,7 +11,7 @@ export type TabId =
 
 export const NAV_ITEMS: { id: TabId; label: string; title: string; icon: string }[] = [
   { id: "pdv", label: "PDV Assistido (Caixa)", title: "PDV Assistido (Caixa Balcão)", icon: "monitor" },
-  { id: "kds", label: "KDS Cozinha", title: "KDS Cozinha (Fila de Produção)", icon: "timer" },
+  { id: "kds", label: "KDS Preparo", title: "KDS Preparo (Fila de Produção)", icon: "timer" },
   { id: "caixa", label: "Caixa & Turnos", title: "Gestão de Caixa & Turnos", icon: "credit-card" },
   { id: "overview", label: "Visão Geral & Métricas", title: "Visão Geral & Métricas", icon: "dashboard" },
   { id: "cardapio", label: "Cardápio & Preços", title: "Cardápio & Preços", icon: "food" },

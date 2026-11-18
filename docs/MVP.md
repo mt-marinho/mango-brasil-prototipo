@@ -21,7 +21,7 @@ Sistema comercial completo composto por:
   - Ativar ou desativar produto (com reflexo instantâneo no totem).
   - Preço customizado por produto, tamanho e adicional.
 * **Pedidos & Produção (KDS):**
-  - Fila de pedidos pagos em tempo real para tablet/tela da cozinha.
+  - Fila de pedidos pagos em tempo real para tablet/tela de preparo.
   - Status do pedido: *Recebido*, *Em preparo*, *Pronto*.
   - Número de senha (chamada de senha na tela do cliente).
 * **Motor Fiscal (NFC-e):**

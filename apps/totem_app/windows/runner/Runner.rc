@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "br.com.burgertech" "\0"
-            VALUE "FileDescription", "totem_app" "\0"
+            VALUE "CompanyName", "br.com.mangobrasil" "\0"
+            VALUE "FileDescription", "Mango Brasil" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "totem_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 br.com.burgertech. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 br.com.mangobrasil. All rights reserved." "\0"
             VALUE "OriginalFilename", "totem_app.exe" "\0"
-            VALUE "ProductName", "totem_app" "\0"
+            VALUE "ProductName", "Mango Brasil" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

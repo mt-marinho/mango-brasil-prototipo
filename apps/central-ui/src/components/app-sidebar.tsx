@@ -36,13 +36,13 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="pointer-events-none">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/20">
-                <GlIcon name="food" className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#153e2b] text-white">
+                <img src="/mango-mark.svg" alt="" className="size-8" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-extrabold tracking-tight">BURGER TECH</span>
+                <span className="truncate font-extrabold tracking-tight">MANGO BRASIL</span>
                 <span className="truncate font-mono text-[10px] font-semibold tracking-wider text-primary uppercase">
-                  Central &amp; PDV 2.0
+                  Mangas temperadas
                 </span>
               </div>
             </SidebarMenuButton>

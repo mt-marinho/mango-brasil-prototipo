@@ -1,4 +1,4 @@
-// Burger Tech - Totem Kiosk Script
+// Mango Brasil - Totem Kiosk Script
 let kioskProducts = [];
 let kioskCart = [];
 let currentCategory = 'cat-1';

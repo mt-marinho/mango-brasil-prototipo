@@ -14,15 +14,15 @@ class TotemKioskApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Burger Tech - Totem de Autoatendimento',
+      title: 'Mango Brasil - Totem de Autoatendimento',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        scaffoldBackgroundColor: const Color(0xFF102A20),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFF59E0B),
+          primary: Color(0xFFF6BC36),
           secondary: Color(0xFF10B981),
-          surface: Color(0xFF1E293B),
+          surface: Color(0xFF193B2D),
         ),
         fontFamily: 'sans-serif',
       ),
@@ -135,31 +135,31 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), Color(0xFF000000)],
+            colors: [Color(0xFF102A20), Color(0xFF071B12)],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.lunch_dining_rounded, size: 120, color: Color(0xFFF59E0B)),
+            const Icon(Icons.eco_rounded, size: 120, color: Color(0xFFF6BC36)),
             const SizedBox(height: 24),
             const Text(
-              'BURGER TECH',
+              'MANGO BRASIL',
               style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, letterSpacing: 2),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Autoatendimento Rápido e Sem Filas',
+              'Mangas temperadas. Sabor de Brasil.',
               style: TextStyle(fontSize: 20, color: Color(0xFF94A3B8)),
             ),
             const SizedBox(height: 64),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B),
+                color: const Color(0xFFF6BC36),
                 borderRadius: BorderRadius.circular(50),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFFF59E0B).withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 4),
+                  BoxShadow(color: const Color(0xFFF6BC36).withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 4),
                 ],
               ),
               child: const Row(
@@ -192,9 +192,9 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
           child: Column(
             children: [
               const SizedBox(height: 32),
-              const Icon(Icons.lunch_dining_rounded, color: Color(0xFFF59E0B), size: 48),
+              const Icon(Icons.eco_rounded, color: Color(0xFFF6BC36), size: 48),
               const SizedBox(height: 8),
-              const Text('BURGER TECH', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              const Text('MANGO BRASIL', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const SizedBox(height: 32),
               Expanded(
                 child: ListView.builder(
@@ -207,10 +207,10 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF1E293B) : Colors.transparent,
+                          color: isSelected ? const Color(0xFF193B2D) : Colors.transparent,
                           border: Border(
                             left: BorderSide(
-                              color: isSelected ? const Color(0xFFF59E0B) : Colors.transparent,
+                              color: isSelected ? const Color(0xFFF6BC36) : Colors.transparent,
                               width: 6,
                             ),
                           ),
@@ -280,12 +280,12 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.shopping_bag_outlined, color: Color(0xFFF59E0B), size: 28),
+                  Icon(Icons.shopping_bag_outlined, color: Color(0xFFF6BC36), size: 28),
                   SizedBox(width: 10),
                   Text('Meu Pedido', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 ],
               ),
-              const Divider(color: Color(0xFF334155), height: 32),
+              const Divider(color: Color(0xFF2E5540), height: 32),
               Expanded(
                 child: _cart.isEmpty
                     ? const Center(
@@ -318,7 +318,7 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
                                     const SizedBox(height: 4),
                                     Text(
                                       currencyFormatter.format(item.totalPrice),
-                                      style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.w600),
+                                      style: const TextStyle(color: Color(0xFFF6BC36), fontWeight: FontWeight.w600),
                                     ),
                                   ],
                                 ),
@@ -332,7 +332,7 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
                         },
                       ),
               ),
-              const Divider(color: Color(0xFF334155), height: 32),
+              const Divider(color: Color(0xFF2E5540), height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -369,9 +369,9 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
   Widget _buildProductCard(dynamic prod) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF193B2D),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFF2E5540)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,14 +379,14 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: Image.network(
-              prod['imageUrl'] ?? '',
+              Uri.parse('http://localhost:4000').resolve(prod['imageUrl'] ?? '').toString(),
               height: 140,
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
                 height: 140,
-                color: const Color(0xFF334155),
-                child: const Icon(Icons.fastfood, size: 48, color: Color(0xFF94A3B8)),
+                color: const Color(0xFF2E5540),
+                child: const Icon(Icons.eco_rounded, size: 48, color: Color(0xFF94A3B8)),
               ),
             ),
           ),
@@ -414,12 +414,12 @@ class _KioskMainScreenState extends State<KioskMainScreen> {
                   children: [
                     Text(
                       currencyFormatter.format(prod['basePrice']),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF59E0B)),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFFF6BC36)),
                     ),
                     ElevatedButton(
                       onPressed: () => _addToCart(prod),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF59E0B),
+                        backgroundColor: const Color(0xFFF6BC36),
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -561,7 +561,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFF193B2D),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Container(
         width: 500,
@@ -580,7 +580,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
         const Text('Escolha como pagar', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Text('Total: ${currencyFormatter.format(widget.total)}',
-            style: const TextStyle(fontSize: 20, color: Color(0xFFF59E0B), fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 20, color: Color(0xFFF6BC36), fontWeight: FontWeight.bold)),
         const SizedBox(height: 32),
         _buildPaymentOption(
           icon: Icons.credit_card_rounded,
@@ -623,19 +623,19 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: const Color(0xFF102A20),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF334155)),
+          border: Border.all(color: const Color(0xFF2E5540)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                color: const Color(0xFFF6BC36).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: const Color(0xFFF59E0B), size: 30),
+              child: Icon(icon, color: const Color(0xFFF6BC36), size: 30),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -660,21 +660,21 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: 16),
-        const CircularProgressIndicator(color: Color(0xFFF59E0B), strokeWidth: 5),
+        const CircularProgressIndicator(color: Color(0xFFF6BC36), strokeWidth: 5),
         const SizedBox(height: 32),
         const Text('Siga as instruções no Pinpad', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF102A20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF334155)),
+            border: Border.all(color: const Color(0xFF2E5540)),
           ),
           child: Text(
             _pinpadStatus,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Color(0xFFF59E0B), fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 16, color: Color(0xFFF6BC36), fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 16),
@@ -696,7 +696,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF102A20),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFF10B981), width: 2),
           ),
@@ -706,7 +706,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
               const SizedBox(height: 4),
               Text(
                 '#$_ticketNumber',
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Color(0xFFF6BC36)),
               ),
             ],
           ),
@@ -721,7 +721,7 @@ class _CheckoutDialogState extends State<CheckoutDialog> {
           child: ElevatedButton(
             onPressed: widget.onOrderFinished,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF59E0B),
+              backgroundColor: const Color(0xFFF6BC36),
               foregroundColor: Colors.black,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

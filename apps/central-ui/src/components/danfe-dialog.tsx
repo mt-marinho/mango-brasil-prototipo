@@ -19,7 +19,7 @@ export function DanfeDialog({ order, onClose }: { order: Order | null; onClose: 
           <>
             <div className="space-y-1 border-b border-dashed border-neutral-400 pb-3 text-center">
               <DialogTitle className="text-sm font-extrabold tracking-tight text-[#1a1a1a]">
-                BURGER TECH RESTAURANTE
+                MANGO BRASIL
               </DialogTitle>
               <p className="text-[10px]">CNPJ: 12.345.678/0001-90 &bull; IE: 283749102</p>
               <p className="text-[10px]">Rua das Lanchonetes, 100 - Centro</p>

@@ -115,8 +115,16 @@ export function PdvView({
   }
 
   return (
-    <div className="flex h-full gap-6">
+    <div className="flex min-h-full flex-col gap-6 lg:h-full lg:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-[#21452e] to-card px-5 py-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Frescor que tempera o dia</p>
+            <h1 className="mt-1 text-xl font-extrabold">Manga boa. Tempero brasileiro.</h1>
+            <p className="mt-1 text-xs text-muted-foreground">Clássica, picante ou agridoce: escolha o sabor do próximo pedido.</p>
+          </div>
+          <img src="/mango-mark.svg" alt="Mango Brasil" className="size-14 shrink-0" />
+        </div>
         <div className="flex shrink-0 items-center gap-2 overflow-x-auto pb-1 text-xs">
           <Button
             size="sm"
@@ -145,7 +153,7 @@ export function PdvView({
               className="group flex flex-col justify-between rounded-2xl border bg-card p-3 transition-colors hover:border-primary/50"
             >
               <div>
-                <div className="relative mb-2.5 h-28 overflow-hidden rounded-xl bg-background">
+                <div className="relative mb-2.5 h-40 overflow-hidden rounded-xl bg-background">
                   <img
                     src={p.imageUrl}
                     alt={p.name}
@@ -169,7 +177,7 @@ export function PdvView({
         </div>
       </div>
 
-      <aside className="flex w-96 shrink-0 flex-col justify-between rounded-2xl border bg-card p-4 shadow-2xl">
+      <aside className="flex w-full shrink-0 flex-col lg:w-96 justify-between rounded-2xl border bg-card p-4 shadow-2xl">
         <div>
           <div className="mb-3 flex items-center justify-between border-b pb-3">
             <h3 className="flex items-center gap-2 text-sm font-bold">

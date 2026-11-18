@@ -25,7 +25,7 @@ export interface ProductSize {
 
 export interface ProductAddition {
   id: string;
-  name: string; // Ex: 'Bacon Extra', 'Queijo Cheddar', 'Molho Especial'
+  name: string; // Ex: 'Limão extra', 'Mix de pimentas', 'Melado de cana'
   price: number;
   maxQuantity: number;
 }

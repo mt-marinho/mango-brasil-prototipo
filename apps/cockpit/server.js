@@ -164,7 +164,7 @@ const state = {
       projectName: 'Totem PDV Central',
       agentId: 'codex',
       category: 'Frontend',
-      thought: 'Para suportar contingência de internet no totem de autoatendimento, estruturando camada local com SQLite/Hive para persistir o catálogo de lanches e bufferizar pedidos offline.',
+      thought: 'Para suportar contingência de internet no totem de autoatendimento, estruturando camada local com SQLite/Hive para persistir o catálogo de mangas temperadas e bufferizar pedidos offline.',
       fileLink: 'F:\\totem-pdv-central\\apps\\totem_app\\lib\\main.dart',
       commitHash: 'b4f12a6',
       timestamp: new Date(Date.now() - 1000 * 60 * 18).toISOString()

@@ -42,18 +42,18 @@ export function KdsView({ data }: { data: CentralData }) {
   return (
     <div className="space-y-4">
       <SectionHeader
-        title="Fila de Produção da Cozinha (KDS Tablet)"
+        title="Bancada de Preparo Mango Brasil"
         description="Pedidos pagos aguardando preparo e expedição"
       >
         <Button variant="outline" size="sm" onClick={() => void data.reloadOrders()}>
-          <GlIcon name="retry" /> Atualizar Cozinha
+          <GlIcon name="retry" /> Atualizar Preparo
         </Button>
       </SectionHeader>
 
       {data.kdsOrders.length === 0 ? (
         <div className="flex items-center justify-center gap-2 py-16 font-mono text-muted-foreground">
           <GlIcon name="check-circle" className="size-5" />
-          Nenhum pedido pendente na cozinha. Tudo entregue!
+          Nenhum pedido pendente no preparo. Tudo entregue!
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

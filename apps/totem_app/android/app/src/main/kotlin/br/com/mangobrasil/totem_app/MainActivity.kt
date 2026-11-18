@@ -1,4 +1,4 @@
-package br.com.burgertech.totem_app
+package br.com.mangobrasil.totem_app
 
 import io.flutter.embedding.android.FlutterActivity
 

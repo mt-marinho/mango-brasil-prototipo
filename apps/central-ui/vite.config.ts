@@ -10,7 +10,12 @@ export default defineConfig({
     alias: { '@': path.resolve(import.meta.dirname, './src') },
   },
   server: {
-    proxy: { '/api': 'http://localhost:4000' },
+    proxy: {
+      '/api': 'http://localhost:4000',
+      '/images': 'http://localhost:4000',
+      '/totem': 'http://localhost:4000',
+      '/totem.js': 'http://localhost:4000',
+    },
   },
   build: {
     // Servido pelo central-web (express.static em ../public)
