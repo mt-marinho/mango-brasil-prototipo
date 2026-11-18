@@ -225,9 +225,9 @@ export function PdvView({
               </p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div>
               {cart.map((l) => (
-                <div key={l.product.id} className="flex items-start gap-3 py-3.5">
+                <div key={l.product.id} className="relative flex items-start gap-3 py-4 after:pointer-events-none after:absolute after:right-0 after:bottom-0 after:left-[60px] after:h-px after:bg-border/50 last:after:hidden">
                   <img src={l.product.imageUrl} alt="" className="size-12 shrink-0 rounded-lg bg-muted object-cover" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm leading-snug font-semibold">{l.product.name}</p>
