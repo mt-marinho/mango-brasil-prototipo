@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { GlIcon } from "@/components/gl-icon"
 import { ORDER_STATUS, StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/lib/api"
 import { elapsed } from "@/lib/format"
 import type { Order, OrderStatus } from "@/lib/types"
@@ -52,6 +53,7 @@ export function KdsView({ data }: { data: CentralData }) {
   const [pending, setPending] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [examples] = useState(exampleOrders)
+  const [tab, setTab] = useState("queue")
   const [, setClock] = useState(0)
 
   useEffect(() => {
@@ -82,12 +84,13 @@ export function KdsView({ data }: { data: CentralData }) {
 
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Fila de preparo</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Acompanhe os pedidos, do preparo até a entrega.</p>
-        </div>
+    <Tabs value={tab} onValueChange={(value) => setTab(String(value))} className="gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <TabsList aria-label="Visualização do preparo" className="w-max justify-start gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
+          <TabsTrigger value="queue" className="flex-none px-4 data-active:border-primary/50 data-active:bg-primary/10 data-active:text-foreground dark:data-active:border-primary/50 dark:data-active:bg-primary/10">Fila de preparo</TabsTrigger>
+          <TabsTrigger value="history" className="flex-none px-4 data-active:border-primary/50 data-active:bg-primary/10 data-active:text-foreground dark:data-active:border-primary/50 dark:data-active:bg-primary/10">Histórico de pedidos</TabsTrigger>
+        </TabsList>
+        {tab === "queue" && (
         <div aria-label="Resumo dos pedidos" className="flex flex-wrap gap-2">
           {counts.map(({ status, label, count }) => (
             <div key={status} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs">
@@ -96,8 +99,10 @@ export function KdsView({ data }: { data: CentralData }) {
             </div>
           ))}
         </div>
+        )}
       </div>
 
+      <TabsContent value="queue">
       {data.kdsOrders.length === 0 ? (
         <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center">
           <div className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground"><GlIcon name="check-circle" className="size-5" /></div>
@@ -158,8 +163,9 @@ export function KdsView({ data }: { data: CentralData }) {
           })}
         </div>
       )}
-      <section aria-labelledby="kds-history-title" className="space-y-4">
-        <h2 id="kds-history-title" className="text-xl font-semibold tracking-tight">Histórico de pedidos</h2>
+      </TabsContent>
+      <TabsContent value="history">
+      <section aria-label="Histórico de pedidos" className="space-y-4">
         <div className="overflow-hidden rounded-xl border bg-card">
         <div className="flex items-center justify-between border-b px-5 py-4"><h3 className="text-sm font-semibold">Pedidos registrados</h3><span className="text-xs text-muted-foreground">{history.length} {history.length === 1 ? "pedido" : "pedidos"}</span></div>
         <div className="divide-y">
@@ -179,6 +185,7 @@ export function KdsView({ data }: { data: CentralData }) {
         </div>
         </div>
       </section>
-    </div>
+      </TabsContent>
+    </Tabs>
   )
 }
