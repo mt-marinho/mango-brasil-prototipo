@@ -117,13 +117,12 @@ export function PdvView({
   return (
     <div className="flex min-h-full flex-col gap-6 lg:h-full lg:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-[#21452e] to-card px-5 py-4">
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-card px-5 py-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Frescor que tempera o dia</p>
             <h1 className="mt-1 text-xl font-extrabold">Manga boa. Tempero brasileiro.</h1>
             <p className="mt-1 text-xs text-muted-foreground">Clássica, picante ou agridoce: escolha o sabor do próximo pedido.</p>
           </div>
-          <img src="/mango-mark.svg" alt="Mango Brasil" className="size-14 shrink-0" />
         </div>
         <div className="flex shrink-0 items-center gap-2 overflow-x-auto pb-1 text-xs">
           <Button

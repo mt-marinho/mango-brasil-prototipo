@@ -24,18 +24,18 @@
       from { transform: translateY(-100%); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    .bg-slate-950, .bg-slate-950\/80, .bg-slate-950\/95 { background-color: #0b2118; }
-    .bg-slate-900 { background-color: #173c2a; }
-    .bg-slate-800 { background-color: #284b37; }
-    .border-slate-800, .border-slate-800\/80 { border-color: #2b4c3b; }
-    .text-slate-400 { color: #a8bcb0; }
-    .text-slate-300 { color: #d0dfd4; }
+    .bg-slate-950, .bg-slate-950\/80, .bg-slate-950\/95 { background-color: #0b0d12; }
+    .bg-slate-900 { background-color: #151820; }
+    .bg-slate-800 { background-color: #252a34; }
+    .border-slate-800, .border-slate-800\/80 { border-color: #30343e; }
+    .text-slate-400 { color: #a1a7b3; }
+    .text-slate-300 { color: #d1d5db; }
     </style>
 </head>
-<body class="bg-[#071b12] text-white h-screen flex justify-center items-center overflow-hidden antialiased">
+<body class="bg-[#090b10] text-white h-screen flex justify-center items-center overflow-hidden antialiased">
 
   <!-- KIOSK CONTAINER (VERTICAL ASPECT 9:16 SIMULATOR) -->
-  <div class="relative w-full max-w-md h-full md:max-h-[920px] md:h-[920px] bg-[#102a20] md:rounded-[36px] md:border-[10px] md:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
+  <div class="relative w-full max-w-md h-full md:max-h-[920px] md:h-[920px] bg-[#151820] md:rounded-[36px] md:border-[10px] md:border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden">
     
     <!-- TOP STATUS BAR & INACTIVITY TIMER -->
     <div class="h-10 bg-slate-950 px-4 flex items-center justify-between text-[11px] font-mono text-slate-400 shrink-0 border-b border-slate-800/80 z-20">
@@ -52,7 +52,7 @@
     </div>
 
     <!-- VIEW 1: ATTRACT SCREEN (DESCANSO) -->
-    <div id="screen-attract" class="flex-1 flex flex-col items-center justify-between p-8 text-center bg-gradient-to-b from-[#102a20] via-[#1b432d] to-[#071b12] cursor-pointer" onclick="startOrder()">
+    <div id="screen-attract" class="flex-1 flex flex-col items-center justify-between p-8 text-center bg-gradient-to-b from-[#151820] via-[#20232d] to-[#090b10] cursor-pointer" onclick="startOrder()">
       <div class="pt-8 space-y-2">
         <div class="inline-flex p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-xl shadow-amber-500/10">
           <img src="/mango-mark.svg" alt="" class="w-16 h-16" />
@@ -114,7 +114,7 @@
     </div>
 
     <!-- VIEW 3: CHECKOUT & TEF PINPAD SIMULATOR -->
-    <div id="screen-checkout" class="flex-1 flex flex-col p-6 hidden justify-between bg-[#102a20]">
+    <div id="screen-checkout" class="flex-1 flex flex-col p-6 hidden justify-between bg-[#151820]">
       <div class="space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
           <h2 class="text-base font-bold text-white">Como deseja pagar?</h2>
@@ -197,7 +197,7 @@
     </div>
 
     <!-- VIEW 4: SUCCESS & PRINTED TICKET -->
-    <div id="screen-success" class="flex-1 flex flex-col items-center justify-between p-6 hidden bg-[#102a20] overflow-y-auto">
+    <div id="screen-success" class="flex-1 flex flex-col items-center justify-between p-6 hidden bg-[#151820] overflow-y-auto">
       <div class="text-center space-y-2 pt-4">
         <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
           <svg class="w-8 h-8 fill-current inline-block" aria-hidden="true"><use href="/gitlab-icons.svg#check"/></svg>
@@ -246,7 +246,7 @@
 
     <!-- MODAL DE CUSTOMIZAÇÃO DE PRODUTO -->
     <div id="customize-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 hidden">
-      <div class="bg-[#102a20] border border-slate-800 rounded-t-3xl md:rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="bg-[#151820] border border-slate-800 rounded-t-3xl md:rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-2 border-b border-slate-800">
           <h3 class="font-extrabold text-sm text-white" id="cust-prod-name">Manga Limão & Sal</h3>
           <button onclick="closeCustomizeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>

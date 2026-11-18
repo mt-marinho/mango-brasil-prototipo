@@ -1,7 +1,7 @@
 import type { Category, Order, OrderStatus, Product, Shift, Totem } from "./types"
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init)
+  const res = await fetch(url, { cache: "no-store", ...init })
   if (!res.ok) throw new Error(`Falha na requisição (${res.status})`)
   return res.json() as Promise<T>
 }

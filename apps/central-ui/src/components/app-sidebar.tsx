@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { GlIcon } from "@/components/gl-icon"
 import { NavUser } from "@/components/nav-user"
-import { NAV_ITEMS, type TabId } from "@/components/nav-items"
+import { NAV_ITEMS, NAV_MODULES, type TabId } from "@/components/nav-items"
 import {
   Sidebar,
   SidebarContent,
@@ -16,33 +16,39 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   activeTab: TabId
   onNavigate: (tab: TabId) => void
   kdsPending: number
+  theme: "dark" | "light"
+  onToggleTheme: () => void
 }
 
 export function AppSidebar({
   activeTab,
   onNavigate,
   kdsPending,
+  theme,
+  onToggleTheme,
   ...props
 }: AppSidebarProps) {
+  const { isMobile, setOpenMobile } = useSidebar()
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="pointer-events-none">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[#153e2b] text-white">
-                <img src="/mango-mark.svg" alt="" className="size-8" />
+              <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-sm font-black tracking-tighter text-primary-foreground">
+                MB
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-extrabold tracking-tight">MANGO BRASIL</span>
                 <span className="truncate font-mono text-[10px] font-semibold tracking-wider text-primary uppercase">
-                  Mangas temperadas
+                  Central de gestão
                 </span>
               </div>
             </SidebarMenuButton>
@@ -51,16 +57,16 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Operação</SidebarGroupLabel>
+        {NAV_MODULES.map((module) => <SidebarGroup key={module.label}>
+          <SidebarGroupLabel>{module.label}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
+              {module.items.map((id) => NAV_ITEMS.find((item) => item.id === id)!).map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     tooltip={item.label}
                     isActive={activeTab === item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => { onNavigate(item.id); if (isMobile) setOpenMobile(false) }}
                   >
                     <GlIcon name={item.icon} />
                     <span>{item.label}</span>
@@ -74,11 +80,21 @@ export function AppSidebar({
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup>)}
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+              onClick={onToggleTheme}
+              aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+            >
+              <GlIcon name={theme === "dark" ? "sun" : "moon"} />
+              <span>{theme === "dark" ? "Tema escuro" : "Tema claro"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Abrir Totem Kiosk"

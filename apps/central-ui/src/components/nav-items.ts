@@ -20,3 +20,10 @@ export const NAV_ITEMS: { id: TabId; label: string; title: string; icon: string 
   { id: "usuarios", label: "Usuários & Logs", title: "Usuários & Permissões", icon: "users" },
   { id: "config", label: "Configurações", title: "Configurações da Empresa", icon: "settings" },
 ]
+
+export const NAV_MODULES: { label: string; items: TabId[] }[] = [
+  { label: "Vendas", items: ["pdv", "caixa"] },
+  { label: "Operação", items: ["kds", "cardapio", "totens"] },
+  { label: "Gestão", items: ["overview", "fiscal"] },
+  { label: "Administração", items: ["usuarios", "config"] },
+]

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { DanfeDialog } from "@/components/danfe-dialog"
@@ -26,6 +26,15 @@ export default function App() {
   const data = useCentralData()
   const [tab, setTab] = useState<TabId>("pdv")
   const [danfeOrder, setDanfeOrder] = useState<Order | null>(null)
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    try { return localStorage.getItem("mango-theme") === "light" ? "light" : "dark" }
+    catch { return "dark" }
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark")
+    try { localStorage.setItem("mango-theme", theme) } catch { /* browser storage may be unavailable */ }
+  }, [theme])
 
   const current = NAV_ITEMS.find((n) => n.id === tab)!
   const openDanfe = (orderId: string) =>
@@ -34,7 +43,7 @@ export default function App() {
   return (
     <TooltipProvider>
       <SidebarProvider className="h-svh overflow-hidden">
-        <AppSidebar activeTab={tab} onNavigate={setTab} kdsPending={data.kdsOrders.length} />
+        <AppSidebar activeTab={tab} onNavigate={(next) => { setTab(next); if (next === "cardapio" || next === "pdv") void data.reload() }} kdsPending={data.kdsOrders.length} theme={theme} onToggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />
         <SidebarInset className="min-w-0 overflow-hidden">
           <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
             <div className="flex items-center gap-2">
