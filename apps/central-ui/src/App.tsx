@@ -42,7 +42,7 @@ export default function App() {
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b px-4">
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger />
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="data-vertical:h-4 data-vertical:self-center" />
         <nav aria-label="Página atual" className="flex min-w-0 items-center">
           <h2 className="truncate text-sm leading-none font-medium text-foreground">{current.title}</h2>
         </nav>

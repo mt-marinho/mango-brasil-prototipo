@@ -3,6 +3,7 @@ import { useMemo, useState, type ReactNode } from "react"
 import { GlIcon } from "@/components/gl-icon"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/lib/api"
 import { brl } from "@/lib/format"
 import type { CentralData } from "@/lib/use-central-data"
@@ -141,8 +142,8 @@ export function PdvView({
     <div className="pdv-scroll flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <section aria-label="Produtos" className="flex min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1">
         {header}
-        <div className="flex flex-col gap-4 p-4 sm:p-6 lg:min-h-0 lg:flex-1">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-4 px-4 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-6 lg:min-h-0 lg:flex-1">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Produtos</h1>
             <p className="mt-1 text-sm text-muted-foreground">Selecione os itens para adicionar ao pedido.</p>
@@ -153,29 +154,22 @@ export function PdvView({
               placeholder="Buscar produto" className="h-10 pl-9 text-sm" />
           </div>
         </div>
-        <div className="pdv-scroll flex shrink-0 items-center gap-2 overflow-x-auto p-1" aria-label="Categorias de produtos">
-          <Button
-            variant={category === "all" ? "secondary" : "ghost"}
-            className={cn("h-10 px-3 text-sm", category === "all" && "border-primary/50 bg-primary/15 text-foreground")}
-            aria-pressed={category === "all"}
-            onClick={() => setCategory("all")}
-          >
+        <Tabs value={category} onValueChange={(value) => { if (typeof value === "string") setCategory(value) }}
+          className="flex min-h-0 flex-col gap-4 lg:flex-1">
+        <div className="pdv-scroll shrink-0 overflow-x-auto p-1">
+          <TabsList aria-label="Categorias de produtos" className="w-max gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
+          <TabsTrigger value="all" className="flex-none px-4">
             Todos
-          </Button>
+          </TabsTrigger>
           {data.categories.map((c) => (
-            <Button
-              key={c.id}
-              variant={category === c.id ? "secondary" : "ghost"}
-              className={cn("h-10 px-3 text-sm", category === c.id && "border-primary/50 bg-primary/15 text-foreground")}
-              aria-pressed={category === c.id}
-              onClick={() => setCategory(c.id)}
-            >
+            <TabsTrigger key={c.id} value={c.id} className="flex-none px-4">
               {c.name}
-            </Button>
+            </TabsTrigger>
           ))}
+          </TabsList>
         </div>
 
-        <div className="pdv-scroll grid grid-cols-1 content-start gap-3 sm:grid-cols-2 lg:flex-1 lg:overflow-y-auto lg:pr-1 xl:grid-cols-3">
+        <TabsContent value={category} className="pdv-scroll grid min-h-0 grid-cols-1 content-start gap-3 sm:grid-cols-2 lg:flex-1 lg:overflow-y-auto lg:pr-1 xl:grid-cols-3">
           {products.length === 0 && <p className="col-span-full rounded-xl border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado. Tente outra busca ou categoria.</p>}
           {products.map((p) => (
             <div
@@ -203,7 +197,8 @@ export function PdvView({
               </div>
             </div>
           ))}
-        </div>
+        </TabsContent>
+        </Tabs>
         </div>
       </section>
 
