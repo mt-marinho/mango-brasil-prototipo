@@ -149,7 +149,7 @@ export function KdsView({ data }: { data: CentralData }) {
                   <div className="px-5 pb-5 pt-2">
                     {errors[order.id] && <p role="alert" className="mb-2 text-xs text-destructive">{errors[order.id]}</p>}
                     <Button
-                      variant={order.status === "READY" ? "secondary" : "default"}
+                      variant={order.status === "PREPARING" ? "default" : "secondary"}
                       className="h-10 w-full font-medium"
                       disabled={pending[order.id]}
                       onClick={() => void advance(order.id, action.next)}
