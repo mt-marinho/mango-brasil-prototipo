@@ -63,7 +63,7 @@ export function CardapioView({ data }: { data: CentralData }) {
       </div>
 
       <div className="!mt-0">
-      <p className="flex h-10 items-center text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
+      <p className="flex h-7 items-center text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "produto" : "produtos"}</p>
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed px-6 py-14 text-center">
           <p className="text-sm font-medium">Nenhum produto encontrado</p>
