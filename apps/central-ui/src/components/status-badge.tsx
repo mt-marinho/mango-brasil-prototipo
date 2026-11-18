@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 const TONES = {
   success: "bg-success/15 text-success",
-  warning: "bg-primary/15 text-primary",
+  warning: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
   info: "bg-info/15 text-info",
   danger: "bg-destructive/15 text-destructive",
   neutral: "bg-secondary text-secondary-foreground",

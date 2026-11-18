@@ -39,14 +39,13 @@ export default function App() {
     setDanfeOrder(data.orders.find((o) => o.id === orderId) ?? null)
 
   const header = (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-      <div className="flex min-w-0 items-center gap-2">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 data-vertical:h-4" />
-        <h2 className="flex items-center gap-2 text-base font-bold">
-          {tab !== "pdv" && <GlIcon name={current.icon} className="size-5 text-primary" />}
-          {current.title}
-        </h2>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b px-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="h-4" />
+        <nav aria-label="Página atual" className="flex min-w-0 items-center">
+          <h2 className="truncate text-sm leading-none font-medium text-foreground">{current.title}</h2>
+        </nav>
       </div>
       {tab !== "pdv" && <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
         onClick={() => void data.reload()}>
