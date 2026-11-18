@@ -249,19 +249,19 @@ export function PdvView({
           )}
         </div>
 
-        <div className="space-y-4 border-t px-5 py-4">
+        <div className="flex flex-col gap-5 border-t px-5 py-5">
           <div className="flex items-center justify-between text-sm">
             <span className="font-semibold">Total a pagar</span>
             <span className="text-xl font-bold tracking-tight tabular-nums">{brl(subtotal)}</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-xs font-semibold">Forma de pagamento</p>
-            <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Forma de pagamento">
+            <div className="grid grid-cols-4 gap-2" role="group" aria-label="Forma de pagamento">
               {PAYMENTS.map((p) => (
                 <Button key={p.method} variant="outline" aria-pressed={method === p.method}
                   className={cn(
-                    "h-14 flex-col gap-1 rounded-lg px-1 text-[11px] font-medium",
+                    "h-15 flex-col gap-1.5 rounded-lg px-1 text-[11px] font-medium",
                     method === p.method && "border-primary bg-primary/10 text-foreground hover:bg-primary/15 dark:border-primary dark:bg-primary/10",
                   )}
                   onClick={() => setMethod(p.method)}>
@@ -290,7 +290,7 @@ export function PdvView({
           <div className="space-y-2">
             <button type="button" aria-expanded={showCpf} aria-controls={showCpf ? "customer-cpf-field" : undefined}
               onClick={() => { setShowCpf(!showCpf); if (showCpf) setCpf("") }}
-              className="flex items-center gap-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
+              className="flex min-h-8 items-center gap-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
               <GlIcon name={showCpf ? "dash" : "plus"} />
               {showCpf ? "Remover CPF da nota" : "Adicionar CPF na nota"}
             </button>
@@ -302,7 +302,7 @@ export function PdvView({
           </div>
 
           <Button size="lg" disabled={busy} onClick={finalize}
-            className="h-11 w-full rounded-lg text-sm font-semibold">
+            className="h-12 w-full rounded-lg text-sm font-semibold">
             {busy ? <><GlIcon name="hourglass" /> Finalizando venda...</> : <>Finalizar venda <GlIcon name="arrow-right" /></>}
           </Button>
         </div>
