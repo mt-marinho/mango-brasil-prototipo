@@ -1,7 +1,6 @@
 import { useState } from "react"
 
 import { GlIcon } from "@/components/gl-icon"
-import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -88,12 +87,10 @@ export function CardapioView({ data }: { data: CentralData }) {
                 </div>
                 <p className="mt-4 flex-1 text-xs leading-5 text-muted-foreground">{product.description}</p>
                 <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium">Disponibilidade</p>
-                    <StatusBadge tone={product.active ? "success" : "neutral"} icon={product.active ? "check-circle" : "pause"} className="font-sans text-xs font-medium normal-case">
-                      {product.active ? "Disponível" : "Indisponível"}
-                    </StatusBadge>
-                  </div>
+                  <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                    <GlIcon name={product.active ? "check-circle" : "pause"} className="size-4" />
+                    {product.active ? "Disponível no cardápio" : "Indisponível no cardápio"}
+                  </span>
                   <Switch checked={product.active} disabled={pending[product.id]} onCheckedChange={() => void toggle(product.id)} aria-label={`Disponibilidade de ${product.name}`} />
                 </div>
                 {errors[product.id] && <p role="alert" className="mt-3 text-xs text-destructive">{errors[product.id]}</p>}
