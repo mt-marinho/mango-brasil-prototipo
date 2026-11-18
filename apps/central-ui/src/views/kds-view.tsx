@@ -122,7 +122,7 @@ export function KdsView({ data }: { data: CentralData }) {
                     <p className="text-xs font-medium text-muted-foreground">Pedido</p>
                     <h2 className="mt-1 text-xl font-semibold tracking-tight tabular-nums">#{order.publicTicketNumber}</h2>
                   </div>
-                  <StatusBadge tone={status.tone} icon={status.icon} className={cn("h-7 font-sans text-xs font-medium normal-case", order.status === "PREPARING" && "bg-primary/15 text-primary dark:text-primary")}>
+                  <StatusBadge tone={order.status === "RECEIVED" ? "neutral" : status.tone} icon={status.icon} className={cn("h-7 font-sans text-xs font-medium normal-case", order.status === "PREPARING" && "bg-primary/15 text-primary dark:text-primary")}>
                     {order.status === "RECEIVED" ? "Aguardando" : order.status === "PREPARING" ? "Em preparo" : order.status === "READY" ? "Pronto" : status.label}
                   </StatusBadge>
                 </div>
