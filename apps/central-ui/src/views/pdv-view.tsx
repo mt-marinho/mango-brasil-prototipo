@@ -22,7 +22,12 @@ const PAYMENTS: { method: PaymentMethod; label: string }[] = [
   { method: "PIX", label: "Pix" },
 ]
 
+const ACTIVE_CATEGORY_STYLE = "flex-none px-4 data-active:border-primary data-active:bg-primary/10 data-active:text-foreground data-active:ring-1 data-active:ring-primary dark:data-active:border-primary dark:data-active:bg-primary/10"
+
 function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: boolean }) {
+  if (method === "CASH") {
+    return <span aria-hidden="true" className={cn("flex size-5 items-center justify-center text-base leading-none font-semibold", selected && "text-primary")}>$</span>
+  }
   if (method === "PIX") {
     return <img src="/pix.svg" alt="" aria-hidden="true" className="size-5 shrink-0 dark:invert" />
   }
@@ -30,19 +35,11 @@ function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: bo
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
       className={cn("size-5 shrink-0", selected && "text-primary")}>
-      {method === "CASH" ? (
-        <>
-          <rect x="3" y="6" width="18" height="12" rx="2" />
-          <circle cx="12" cy="12" r="2.5" />
-          <path d="M6 9h.01M18 15h.01" />
-        </>
-      ) : (
-        <>
+      <>
           <rect x="3" y="5" width="18" height="14" rx="2.5" />
           <path d="M3 9.5h18" />
           {method === "DEBIT_CARD" ? <path d="M8 13v3m-1.5-1.5L8 16l1.5-1.5" /> : <path d="M7 15h4" />}
-        </>
-      )}
+      </>
     </svg>
   )
 }
@@ -158,11 +155,11 @@ export function PdvView({
           className="flex min-h-0 flex-col gap-4 lg:flex-1">
         <div className="pdv-scroll shrink-0 overflow-x-auto py-1">
           <TabsList aria-label="Categorias de produtos" className="w-max justify-start gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
-          <TabsTrigger value="all" className="flex-none px-4 data-active:border-primary/50 data-active:shadow-[inset_0_-2px_0_var(--primary)] dark:data-active:border-primary/50 dark:data-active:shadow-[inset_0_-2px_0_var(--primary)]">
+          <TabsTrigger value="all" className={ACTIVE_CATEGORY_STYLE}>
             Todos
           </TabsTrigger>
           {data.categories.map((c) => (
-            <TabsTrigger key={c.id} value={c.id} className="flex-none px-4 data-active:border-primary/50 data-active:shadow-[inset_0_-2px_0_var(--primary)] dark:data-active:border-primary/50 dark:data-active:shadow-[inset_0_-2px_0_var(--primary)]">
+            <TabsTrigger key={c.id} value={c.id} className={ACTIVE_CATEGORY_STYLE}>
               {c.name}
             </TabsTrigger>
           ))}
@@ -275,7 +272,7 @@ export function PdvView({
                 <Button key={p.method} variant="outline" aria-pressed={method === p.method}
                   className={cn(
                     "h-14 flex-col gap-1 rounded-lg px-1 text-[11px] font-medium",
-                    method === p.method && "border-primary bg-primary/10 text-foreground ring-1 ring-primary hover:bg-primary/15 dark:bg-primary/10",
+                    method === p.method && "border-primary bg-primary/10 text-foreground ring-1 ring-primary hover:bg-primary/15 dark:border-primary dark:bg-primary/10",
                   )}
                   onClick={() => setMethod(p.method)}>
                   <PaymentIcon method={p.method} selected={method === p.method} />
@@ -301,8 +298,8 @@ export function PdvView({
           )}
 
           <div className="space-y-2">
-            <label htmlFor="customer-cpf" className="text-xs font-semibold">
-              CPF na nota <span className="font-normal text-muted-foreground">(opcional)</span>
+            <label htmlFor="customer-cpf" className="flex items-baseline gap-1 text-xs font-semibold">
+              <span>CPF na nota</span><span className="font-normal text-muted-foreground">(opcional)</span>
             </label>
             <Input id="customer-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)}
               placeholder="Somente números" inputMode="numeric" className="h-10 text-sm" />
