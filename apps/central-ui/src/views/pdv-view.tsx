@@ -21,12 +21,39 @@ const CATEGORY_ICONS: Record<string, string> = {
   "cat-4": "star",
 }
 
-const PAYMENTS: { method: PaymentMethod; label: string; icon: string }[] = [
-  { method: "CASH", label: "Dinheiro", icon: "scale" },
-  { method: "DEBIT_CARD", label: "Débito", icon: "credit-card" },
-  { method: "CREDIT_CARD", label: "Crédito", icon: "credit-card" },
-  { method: "PIX", label: "Pix", icon: "bolt" },
+const PAYMENTS: { method: PaymentMethod; label: string }[] = [
+  { method: "CASH", label: "Dinheiro" },
+  { method: "DEBIT_CARD", label: "Débito" },
+  { method: "CREDIT_CARD", label: "Crédito" },
+  { method: "PIX", label: "Pix" },
 ]
+
+function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: boolean }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      className={cn("size-5 shrink-0", selected && "text-primary")}>
+      {method === "CASH" ? (
+        <>
+          <rect x="3" y="6" width="18" height="12" rx="2" />
+          <circle cx="12" cy="12" r="2.5" />
+          <path d="M6 9h.01M18 15h.01" />
+        </>
+      ) : method === "PIX" ? (
+        <>
+          <path d="M9 3.5 5 7.5l4.2 4.2a4 4 0 0 0 5.6 0L19 7.5l-4-4a4.2 4.2 0 0 0-6 0Z" />
+          <path d="m9 20.5-4-4 4.2-4.2a4 4 0 0 1 5.6 0l4.2 4.2-4 4a4.2 4.2 0 0 1-6 0Z" />
+        </>
+      ) : (
+        <>
+          <rect x="3" y="5" width="18" height="14" rx="2.5" />
+          <path d="M3 9.5h18" />
+          {method === "DEBIT_CARD" ? <path d="M8 13v3m-1.5-1.5L8 16l1.5-1.5" /> : <path d="M7 15h4" />}
+        </>
+      )}
+    </svg>
+  )
+}
 
 export function PdvView({
   data,
@@ -254,7 +281,7 @@ export function PdvView({
                     method === p.method && "border-primary bg-primary/10 text-foreground ring-1 ring-primary hover:bg-primary/15 dark:bg-primary/10",
                   )}
                   onClick={() => setMethod(p.method)}>
-                  <GlIcon name={p.icon} className={cn("size-4", method === p.method && "text-primary")} />
+                  <PaymentIcon method={p.method} selected={method === p.method} />
                   {p.label}
                 </Button>
               ))}
