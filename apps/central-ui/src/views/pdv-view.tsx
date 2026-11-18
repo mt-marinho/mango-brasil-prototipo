@@ -204,9 +204,10 @@ export function PdvView({
               {itemCount === 1 ? "1 item no pedido" : itemCount + " itens no pedido"}
             </p>
           </div>
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive"
-            onClick={() => setCart([])} disabled={cart.length === 0}>
-            <GlIcon name="remove" /> Limpar
+          <Button variant="outline" size="sm"
+            className="h-9 gap-1.5 px-3 text-xs font-medium text-muted-foreground hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Limpar pedido" onClick={() => setCart([])} disabled={cart.length === 0}>
+            <GlIcon name="remove" className="size-3.5" /> Limpar
           </Button>
         </div>
 
