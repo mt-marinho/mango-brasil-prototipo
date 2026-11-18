@@ -56,6 +56,7 @@ export function PdvView({
   )
   const given = Number(cashGiven || 0)
   const change = given >= subtotal && subtotal > 0 ? given - subtotal : 0
+  const itemCount = cart.reduce((total, line) => total + line.quantity, 0)
 
   const add = (product: Product) =>
     setCart((prev) => {
@@ -176,91 +177,84 @@ export function PdvView({
         </div>
       </div>
 
-      <aside className="flex w-full shrink-0 flex-col lg:w-96 justify-between rounded-2xl border bg-card p-4 shadow-2xl">
-        <div>
-          <div className="mb-3 flex items-center justify-between border-b pb-3">
-            <h3 className="flex items-center gap-2 text-sm font-bold">
-              <GlIcon name="doc-text" /> Pedido do Balcão
-            </h3>
-            <Button variant="ghost" size="xs" className="text-destructive" onClick={() => setCart([])}>
-              <GlIcon name="remove" /> Limpar Carrinho
-            </Button>
+      <aside className="flex w-full shrink-0 flex-col overflow-hidden rounded-xl border bg-card lg:w-[380px]">
+        <div className="flex items-start justify-between gap-4 border-b px-5 py-5">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Venda presencial</p>
+            <h3 className="mt-1 text-base font-bold tracking-tight">Pedido do balcão</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {itemCount === 1 ? "1 item no pedido" : itemCount + " itens no pedido"}
+            </p>
           </div>
-          <div className="max-h-60 space-y-2 overflow-y-auto pr-1 text-xs">
-            {cart.length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground">
-                Nenhum item adicionado. Clique nos produtos para vender.
-              </div>
-            ) : (
-              cart.map((l) => (
-                <div
-                  key={l.product.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border bg-background p-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-xs font-bold">{l.product.name}</div>
-                    <div className="font-mono text-[10px] text-primary">
-                      {brl(l.product.basePrice)} un.
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <Button
-                      variant="secondary"
-                      size="icon-xs"
-                      aria-label="Diminuir quantidade"
-                      onClick={() => changeQty(l.product.id, -1)}
-                    >
-                      <GlIcon name="dash" />
-                    </Button>
-                    <span className="w-6 text-center font-mono text-xs font-bold">{l.quantity}</span>
-                    <Button
-                      variant="secondary"
-                      size="icon-xs"
-                      aria-label="Aumentar quantidade"
-                      onClick={() => changeQty(l.product.id, 1)}
-                    >
-                      <GlIcon name="plus" />
-                    </Button>
-                  </div>
-                  <div className="w-16 shrink-0 text-right font-mono text-xs font-bold">
-                    {brl(l.quantity * l.product.basePrice)}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive"
+            onClick={() => setCart([])} disabled={cart.length === 0}>
+            <GlIcon name="remove" /> Limpar
+          </Button>
         </div>
 
-        <div className="mt-3 space-y-3 border-t pt-3 text-xs">
-          <div className="space-y-1.5 font-mono">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal:</span>
-              <span>{brl(subtotal)}</span>
+        <div className="flex min-h-36 flex-1 flex-col overflow-y-auto px-5 py-2">
+          {cart.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
+              <div className="mb-3 flex size-10 items-center justify-center rounded-full border bg-muted/50 text-muted-foreground">
+                <GlIcon name="doc-text" className="size-5" />
+              </div>
+              <p className="text-sm font-semibold">Seu pedido está vazio</p>
+              <p className="mt-1 max-w-52 text-xs leading-relaxed text-muted-foreground">
+                Selecione os produtos no cardápio para iniciar uma venda.
+              </p>
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Tributos Aprox. (IBPT):</span>
-              <span className="text-primary">{brl(ibpt)}</span>
+          ) : (
+            <div className="divide-y">
+              {cart.map((l) => (
+                <div key={l.product.id} className="flex items-start gap-3 py-4">
+                  <img src={l.product.imageUrl} alt="" className="size-12 shrink-0 rounded-md bg-muted object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{l.product.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{brl(l.product.basePrice)} / unidade</p>
+                    <div className="mt-2 flex items-center gap-1">
+                      <Button variant="outline" size="icon-xs" aria-label={"Diminuir quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, -1)}>
+                        <GlIcon name="dash" />
+                      </Button>
+                      <span className="w-6 text-center text-xs font-semibold tabular-nums">{l.quantity}</span>
+                      <Button variant="outline" size="icon-xs" aria-label={"Aumentar quantidade de " + l.product.name} onClick={() => changeQty(l.product.id, 1)}>
+                        <GlIcon name="plus" />
+                      </Button>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums">{brl(l.quantity * l.product.basePrice)}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex justify-between border-t pt-1 text-base font-bold">
-              <span>TOTAL A PAGAR:</span>
-              <span className="text-lg font-extrabold text-success">{brl(subtotal)}</span>
+          )}
+        </div>
+
+        <div className="space-y-5 border-t px-5 py-5">
+          <div className="space-y-2.5 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Subtotal</span>
+              <span className="tabular-nums">{brl(subtotal)}</span>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Tributos aproximados inclusos</span>
+              <span className="tabular-nums">{brl(ibpt)}</span>
+            </div>
+            <div className="flex items-end justify-between border-t pt-3">
+              <span className="font-semibold">Total a pagar</span>
+              <span className="text-xl font-bold tracking-tight tabular-nums">{brl(subtotal)}</span>
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-              Forma de Pagamento:
-            </span>
-            <div className="grid grid-cols-4 gap-1.5">
+            <p className="text-xs font-semibold">Forma de pagamento</p>
+            <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Forma de pagamento">
               {PAYMENTS.map((p) => (
-                <Button
-                  key={p.method}
-                  variant={method === p.method ? "default" : "outline"}
-                  aria-pressed={method === p.method}
-                  className="h-auto flex-col gap-1 py-2 text-[11px]"
-                  onClick={() => setMethod(p.method)}
-                >
-                  <GlIcon name={p.icon} />
+                <Button key={p.method} variant="outline" aria-pressed={method === p.method}
+                  className={cn(
+                    "h-14 flex-col gap-1 rounded-lg px-1 text-[11px] font-medium",
+                    method === p.method && "border-primary bg-primary/10 text-foreground ring-1 ring-primary hover:bg-primary/15 dark:bg-primary/10",
+                  )}
+                  onClick={() => setMethod(p.method)}>
+                  <GlIcon name={p.icon} className={cn("size-4", method === p.method && "text-primary")} />
                   {p.label}
                 </Button>
               ))}
@@ -268,54 +262,33 @@ export function PdvView({
           </div>
 
           {method === "CASH" && (
-            <div className="space-y-1.5 rounded-xl border bg-background p-2.5 font-mono text-xs">
-              <div className="flex items-center justify-between">
-                <label htmlFor="cash-given" className="text-muted-foreground">
-                  Valor Recebido (R$):
-                </label>
-                <Input
-                  id="cash-given"
-                  type="number"
-                  value={cashGiven}
-                  onChange={(e) => setCashGiven(e.target.value)}
-                  placeholder="0,00"
-                  className="h-7 w-24 text-right font-bold"
-                />
-              </div>
-              <div
-                className={cn(
-                  "flex items-center justify-between border-t pt-1 font-bold",
-                  change > 0 ? "text-success" : "text-primary",
-                )}
-              >
-                <span>TROCO:</span>
-                <span>{brl(change)}</span>
+            <div className="space-y-2">
+              <label htmlFor="cash-given" className="text-xs font-semibold">Valor recebido</label>
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
+                  <Input id="cash-given" type="number" min="0" step="0.01" value={cashGiven}
+                    onChange={(e) => setCashGiven(e.target.value)} placeholder="0,00" className="h-10 pl-9 text-sm tabular-nums" />
+                </div>
+                <div className="min-w-24 text-right">
+                  <span className="block text-[11px] text-muted-foreground">Troco</span>
+                  <span className="text-sm font-semibold tabular-nums">{brl(change)}</span>
+                </div>
               </div>
             </div>
           )}
 
-          <Input
-            value={cpf}
-            onChange={(e) => setCpf(e.target.value)}
-            placeholder="CPF na nota (opcional, apenas números)"
-            className="font-mono text-[11px]"
-          />
+          <div className="space-y-2">
+            <label htmlFor="customer-cpf" className="text-xs font-semibold">
+              CPF na nota <span className="font-normal text-muted-foreground">(opcional)</span>
+            </label>
+            <Input id="customer-cpf" value={cpf} onChange={(e) => setCpf(e.target.value)}
+              placeholder="Somente números" inputMode="numeric" className="h-10 text-sm" />
+          </div>
 
-          <Button
-            size="lg"
-            disabled={busy}
-            onClick={finalize}
-            className="h-11 w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-400"
-          >
-            {busy ? (
-              <>
-                <GlIcon name="hourglass" /> Emitindo NFC-e &amp; Enviando...
-              </>
-            ) : (
-              <>
-                <GlIcon name="rocket" /> Finalizar Venda &amp; Emitir NFC-e
-              </>
-            )}
+          <Button size="lg" disabled={busy} onClick={finalize}
+            className="h-11 w-full rounded-lg text-sm font-semibold">
+            {busy ? <><GlIcon name="hourglass" /> Finalizando venda...</> : <>Finalizar venda <GlIcon name="arrow-right" /></>}
           </Button>
         </div>
       </aside>
