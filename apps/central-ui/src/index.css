@@ -1,14 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
+    --font-sans: 'Inter Variable', sans-serif;
     --font-mono: 'JetBrains Mono Variable', monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -59,10 +59,10 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: #18794e;
+    --primary: #dedf14;
     --success: oklch(0.696 0.17 162.48);
     --info: oklch(0.623 0.214 259.8);
-    --primary-foreground: #ffffff;
+    --primary-foreground: #191a04;
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
@@ -72,7 +72,7 @@
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: #18794e;
+    --ring: #929306;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -81,12 +81,12 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: #18794e;
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: #e9f5ed;
-    --sidebar-accent-foreground: #17643f;
+    --sidebar-primary: #dedf14;
+    --sidebar-primary-foreground: #191a04;
+    --sidebar-accent: #f3f3d2;
+    --sidebar-accent-foreground: #555704;
     --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: #18794e;
+    --sidebar-ring: #929306;
 }
 
 .dark {
@@ -96,8 +96,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: #151820;
     --popover-foreground: oklch(0.985 0 0);
-    --primary: #49ad72;
-    --primary-foreground: #071d11;
+    --primary: #dedf14;
+    --primary-foreground: #191a04;
     --secondary: #21252f;
     --secondary-foreground: oklch(0.985 0 0);
     --muted: #21252f;
@@ -109,21 +109,24 @@
     --info: #60a5fa;
     --border: #30343e;
     --input: #30343e;
-    --ring: #49ad72;
-    --chart-1: #49ad72;
+    --ring: #dedf14;
+    --chart-1: #dedf14;
     --chart-2: #34d399;
     --chart-3: #60a5fa;
     --chart-4: #22d3ee;
     --chart-5: #a78bfa;
     --sidebar: #101218;
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: #49ad72;
-    --sidebar-primary-foreground: #071d11;
-    --sidebar-accent: rgb(73 173 114 / 12%);
-    --sidebar-accent-foreground: #7cce9b;
+    --sidebar-primary: #dedf14;
+    --sidebar-primary-foreground: #191a04;
+    --sidebar-accent: rgb(222 223 20 / 12%);
+    --sidebar-accent-foreground: #e4e654;
     --sidebar-border: #30343e;
-    --sidebar-ring: #49ad72;
+    --sidebar-ring: #dedf14;
 }
+
+/* Em fundo claro, a versão escura mantém legíveis textos e ícones de destaque. */
+:root:not(.dark) .text-primary { color: #646600; }
 
 @layer base {
   * {

@@ -156,13 +156,13 @@ export function PdvView({
         </div>
         <Tabs value={category} onValueChange={(value) => { if (typeof value === "string") setCategory(value) }}
           className="flex min-h-0 flex-col gap-4 lg:flex-1">
-        <div className="pdv-scroll shrink-0 overflow-x-auto p-1">
-          <TabsList aria-label="Categorias de produtos" className="w-max gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
-          <TabsTrigger value="all" className="flex-none px-4">
+        <div className="pdv-scroll shrink-0 overflow-x-auto py-1">
+          <TabsList aria-label="Categorias de produtos" className="w-max justify-start gap-1 bg-muted/60 p-1 group-data-horizontal/tabs:h-11">
+          <TabsTrigger value="all" className="flex-none px-4 data-active:border-primary/50 data-active:shadow-[inset_0_-2px_0_var(--primary)] dark:data-active:border-primary/50 dark:data-active:shadow-[inset_0_-2px_0_var(--primary)]">
             Todos
           </TabsTrigger>
           {data.categories.map((c) => (
-            <TabsTrigger key={c.id} value={c.id} className="flex-none px-4">
+            <TabsTrigger key={c.id} value={c.id} className="flex-none px-4 data-active:border-primary/50 data-active:shadow-[inset_0_-2px_0_var(--primary)] dark:data-active:border-primary/50 dark:data-active:shadow-[inset_0_-2px_0_var(--primary)]">
               {c.name}
             </TabsTrigger>
           ))}
@@ -262,7 +262,7 @@ export function PdvView({
               <span>Tributos aproximados inclusos</span>
               <span className="tabular-nums">{brl(ibpt)}</span>
             </div>
-            <div className="flex items-end justify-between border-t pt-3">
+            <div className="flex items-center justify-between border-t pt-3">
               <span className="font-semibold">Total a pagar</span>
               <span className="text-xl font-bold tracking-tight tabular-nums">{brl(subtotal)}</span>
             </div>
@@ -286,19 +286,17 @@ export function PdvView({
           </div>
 
           {method === "CASH" && (
-            <div className="space-y-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2">
               <label htmlFor="cash-given" className="text-xs font-semibold">Valor recebido</label>
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1">
+              <span className="text-right text-xs font-semibold text-muted-foreground">Troco</span>
+                <div className="relative min-w-0">
                   <span className="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
                   <Input id="cash-given" type="number" min="0" step="0.01" value={cashGiven}
                     onChange={(e) => setCashGiven(e.target.value)} placeholder="0,00" className="h-10 pl-9 text-sm tabular-nums" />
                 </div>
-                <div className="min-w-24 text-right">
-                  <span className="block text-[11px] text-muted-foreground">Troco</span>
+                <div className="flex h-10 min-w-20 items-center justify-end text-right">
                   <span className="text-sm font-semibold tabular-nums">{brl(change)}</span>
                 </div>
-              </div>
             </div>
           )}
 
