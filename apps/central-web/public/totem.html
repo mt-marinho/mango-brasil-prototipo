@@ -18,10 +18,11 @@
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-debit" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20m-13 5h6"/></symbol>
+    <symbol id="i-pinpad" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M8 6h8v4H8zM9 14h.01m3 0h.01m3 0h.01M9 18h.01m3 0h.01m3 0h.01"/></symbol>
     <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></symbol>
     <symbol id="i-pix" viewBox="0 0 24 24"><path d="M8 3.5h.6c.5 0 1 .2 1.4.6l1.5 1.5c.3.3.7.3 1 0L14 4.1c.4-.4.9-.6 1.4-.6h.6L13.7 1.2a2.4 2.4 0 0 0-3.4 0L8 3.5ZM16 20.5h-.6c-.5 0-1-.2-1.4-.6l-1.5-1.5c-.3-.3-.7-.3-1 0L10 19.9c-.4.4-.9.6-1.4.6H8l2.3 2.3a2.4 2.4 0 0 0 3.4 0l2.3-2.3ZM22.8 10.3l-4.1-4.1h-3.3a.7.7 0 0 0-.5.2l-1.5 1.5a2 2 0 0 1-2.8 0L9.1 6.4a.7.7 0 0 0-.5-.2H5.3l-4.1 4.1a2.4 2.4 0 0 0 0 3.4l4.1 4.1h3.3c.2 0 .4-.1.5-.2l1.5-1.5a2 2 0 0 1 2.8 0l1.5 1.5c.1.1.3.2.5.2h3.3l4.1-4.1a2.4 2.4 0 0 0 0-3.4Z" fill="currentColor" stroke="none"/></symbol>
     <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0m-9 4a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r=".5"/></symbol>
-    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 4 3c-1 .5-1 1-1 2m0 3h.01"/></symbol>
     <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 3C8 2 2 8 6 16c8 4 14-2 14-13ZM4 21 15 10"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
@@ -33,14 +34,13 @@
     </header>
     <div id="connection-notice" class="connection-notice" role="status" hidden></div>
     <nav id="order-progress" class="progress" aria-label="Etapas do pedido" hidden>
-      <span data-step="menu"><b>1</b> Escolha</span><i></i><span data-step="cart"><b>2</b> Revise</span><i></i><span data-step="checkout"><b>3</b> Pague</span>
+      <span data-step="menu"><b>1</b> Escolha</span><i></i><span data-step="checkout"><b>2</b> Finalizar pedido</span>
     </nav>
 
     <section id="screen-attract" class="screen attract" aria-labelledby="attract-title">
-      <div class="attract-photo"><img src="/images/manga-picante.png" alt="Manga fresca em palitos com limão e temperos"><span class="fresh-tag"><svg class="icon"><use href="#i-leaf"/></svg> Fresquinha. Feita pra você.</span></div>
+      <div class="attract-photo"><img src="/images/manga-picante.png" alt="Manga fresca em palitos com limão e temperos"><div class="attract-brand">MANGO BRASIL</div><span class="fresh-tag"><svg class="icon"><use href="#i-leaf"/></svg> Fresquinha. Feita pra você.</span></div>
       <div class="attract-content"><span class="eyebrow">UM TOQUE DE FRESCOR NO SEU DIA</span><h1 id="attract-title">Sua manga.<br><em>Do seu jeito.</em></h1><p>Escolha seu sabor, capriche nos extras<br>e deixe o resto com a gente.</p>
-        <button class="button primary start-button" id="start-order">Começar meu pedido <svg class="icon"><use href="#i-arrow"/></svg></button>
-        <div class="accepted-payments"><svg class="icon"><use href="#i-pix"/></svg> Pix <span>•</span><svg class="icon"><use href="#i-card"/></svg> Crédito e débito</div>
+        <button class="button primary start-button" id="start-order">Iniciar meu pedido</button>
       </div>
     </section>
 
@@ -51,43 +51,94 @@
       <footer class="order-footer"><div class="cart-summary"><span class="bag-count"><svg class="icon"><use href="#i-bag"/></svg><b id="cart-badge">0</b></span><div><span class="muted small" id="kiosk-cart-count">Seu pedido está vazio</span><strong id="kiosk-cart-total">R$ 0,00</strong></div></div><button class="button primary" id="btn-kiosk-checkout" disabled>Ver meu pedido <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
     </section>
 
-    <section id="screen-cart" class="screen" aria-labelledby="cart-title" hidden>
-      <div class="section-heading"><div><button class="back-link" data-action="menu"><svg class="icon"><use href="#i-back"/></svg> Continuar escolhendo</button><h1 id="cart-title" tabindex="-1">Tudo do seu jeito?</h1><p>Confira os itens antes de continuar.</p></div><button class="icon-button" data-action="help" aria-label="Preciso de ajuda"><svg class="icon"><use href="#i-help"/></svg></button></div>
-      <div class="scroll-content cart-content"><div id="cart-items"></div><button class="button secondary add-more" data-action="menu"><svg class="icon"><use href="#i-plus"/></svg> Adicionar mais delícias</button><button class="text-button cancel-order" id="cancel-order"><svg class="icon"><use href="#i-trash"/></svg> Cancelar pedido</button></div>
-      <footer class="order-footer"><div class="footer-total"><span class="muted small">Total do pedido</span><strong id="cart-total">R$ 0,00</strong></div><button class="button primary" id="go-payment">Ir para pagamento <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
-    </section>
-
     <section id="screen-checkout" class="screen" aria-labelledby="checkout-title" hidden>
-      <div class="section-heading"><div><button class="back-link" data-action="cart"><svg class="icon"><use href="#i-back"/></svg> Revisar meu pedido</button><h1 id="checkout-title" tabindex="-1">Como prefere pagar?</h1><p>Falta só um passo para matar a vontade.</p></div></div>
-      <div class="scroll-content payment-content"><div class="payment-summary"><span id="checkout-count"></span><strong id="checkout-total-val"></strong></div>
-        <fieldset class="payment-options"><legend class="eyebrow">FORMA DE PAGAMENTO</legend>
-          <label class="payment-option"><input type="radio" name="payment" value="PIX" checked><span class="payment-icon pix"><svg class="icon"><use href="#i-pix"/></svg></span><span><strong>Pix</strong><small>Pelo aplicativo do seu banco</small></span><span class="radio-mark"></span></label>
-          <label class="payment-option"><input type="radio" name="payment" value="CREDIT_CARD"><span class="payment-icon"><svg class="icon"><use href="#i-card"/></svg></span><span><strong>Cartão de crédito</strong><small>Aproxime ou insira na maquininha</small></span><span class="radio-mark"></span></label>
-          <label class="payment-option"><input type="radio" name="payment" value="DEBIT_CARD"><span class="payment-icon"><svg class="icon"><use href="#i-card"/></svg></span><span><strong>Cartão de débito</strong><small>Aproxime ou insira na maquininha</small></span><span class="radio-mark"></span></label>
-        </fieldset>
-        <p class="simulation-note">Este é um simulador. Nenhuma cobrança será realizada.</p>
+      <div class="scroll-content checkout-scroll">
+      <div class="section-heading">
+        <div><button class="back-link" data-action="menu"><svg class="icon"><use href="#i-back"/></svg> Continuar escolhendo</button>
+          <h1 id="checkout-title" tabindex="-1">Revise e pague</h1></div>
+      </div>
+      <div class="payment-content">
+        <div id="cart-items"></div>
+        <form id="checkout-form" class="checkout-form" novalidate>
+          <div class="checkout-fields">
+            <label for="order-name">Primeiro nome para retirada <span class="muted">(opcional)</span>
+              <input id="order-name" type="text" maxlength="40" autocomplete="off" placeholder="Ex.: Ana">
+            </label>
+          </div>
+          <section class="payment-options" aria-labelledby="payment-options-title">
+            <h2 id="payment-options-title">Como prefere pagar?</h2>
+            <button class="payment-option" type="button" data-payment="PIX" aria-pressed="false"><span class="payment-icon pix"><svg class="icon"><use href="#i-pix"/></svg></span><span><strong>Pix</strong><small>QR Code na maquininha</small></span><span class="payment-choice">Selecionado ✓</span></button>
+            <button class="payment-option" type="button" data-payment="CREDIT_CARD" aria-pressed="false"><span class="payment-icon"><svg class="icon"><use href="#i-card"/></svg></span><span><strong>Cartão de crédito</strong><small>Aproxime ou insira na maquininha</small></span><span class="payment-choice">Selecionado ✓</span></button>
+            <button class="payment-option" type="button" data-payment="DEBIT_CARD" aria-pressed="false"><span class="payment-icon"><svg class="icon"><use href="#i-debit"/></svg></span><span><strong>Cartão de débito</strong><small>Aproxime ou insira na maquininha</small></span><span class="payment-choice">Selecionado ✓</span></button>
+          </section>
+        </form>
         <button class="text-button cancel-order" data-action="cancel-order"><svg class="icon"><use href="#i-trash"/></svg> Cancelar pedido</button>
       </div>
-      <footer class="order-footer"><div class="footer-total"><span class="muted small">Total a pagar</span><strong id="payment-total"></strong></div><button class="button primary" id="pay-button">Continuar com Pix <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
+      </div>
+      <footer class="order-footer"><div class="footer-total"><span class="muted small">Total a pagar</span><strong id="payment-total"></strong></div><button class="button primary" id="finalize-order" type="button" disabled>Finalizar pedido <svg class="icon"><use href="#i-arrow"/></svg></button></footer>
+    </section>
+
+    <section id="screen-payment" class="screen result-screen" aria-labelledby="payment-title" hidden>
+      <div class="result-content">
+        <div class="pinpad-illustration" aria-hidden="true"><svg class="icon"><use href="#i-pinpad"/></svg><svg class="icon"><use href="#i-arrow"/></svg></div>
+        <h1 id="payment-title" tabindex="-1">Siga as instruções na maquininha</h1>
+        <p id="payment-status" role="status" aria-atomic="true"></p>
+        <p class="simulation-note">Pagamento simulado</p>
+      </div>
+      <div class="result-footer">
+        <button class="button secondary" id="cancel-payment"><svg class="icon"><use href="#i-close"/></svg> Cancelar</button>
+        <div id="payment-recovery" hidden>
+          <button class="button primary" id="retry-payment">Tentar novamente <svg class="icon"><use href="#i-arrow"/></svg></button>
+          <button class="button secondary" id="change-payment"><svg class="icon"><use href="#i-back"/></svg> Escolher outra forma de pagamento</button>
+        </div>
+      </div>
     </section>
 
     <section id="screen-success" class="screen result-screen" aria-labelledby="success-title" hidden>
-      <div class="result-content"><span class="result-icon"><svg class="icon"><use href="#i-check"/></svg></span><span class="eyebrow">AGORA É COM A GENTE</span><h1 id="success-title" tabindex="-1">Pedido confirmado!</h1><p>Já vamos preparar suas delícias.<br>Acompanhe sua senha no painel de retirada.</p><div class="ticket"><span>SUA SENHA</span><strong id="success-ticket-number"></strong><small>Retire no balcão quando for chamada</small></div><div class="receipt-summary" id="success-receipt-items"></div><div class="receipt-total"><span>Total do pedido</span><strong id="success-receipt-total"></strong></div></div>
-      <div class="result-footer"><button class="button primary" data-action="finish">Concluir <svg class="icon"><use href="#i-check"/></svg></button><p class="muted small" id="success-countdown"></p></div>
-    </section>
-
-    <section id="screen-pending" class="screen result-screen" aria-labelledby="pending-title" hidden>
-      <div class="result-content"><span class="result-icon pending"><svg class="icon"><use href="#i-clock"/></svg></span><h1 id="pending-title" tabindex="-1">Pedido salvo neste totem</h1><p>A conexão está instável. Vamos reenviar automaticamente quando ela voltar.</p><div class="pending-message">Ainda não temos uma senha de retirada.<br>Se precisar, peça ajuda no balcão.</div><p class="simulation-note">Pagamento demonstrativo. Nenhuma cobrança real.</p></div>
-      <div class="result-footer"><button class="button primary" id="retry-order">Consultar novamente <svg class="icon"><use href="#i-arrow"/></svg></button><button class="button secondary" data-action="finish">Voltar ao início</button></div>
+      <div class="result-content">
+        <span class="result-icon"><svg class="icon"><use href="#i-check"/></svg></span>
+        <h1 id="success-title" tabindex="-1">Pedido confirmado!</h1>
+        <div class="ticket"><span>SUA SENHA</span><strong id="success-ticket-number"></strong><p id="success-name" hidden></p><small>Retire no balcão quando for chamada</small></div>
+        <p class="simulation-note">NFC-e simulada · Demonstração sem emissão de nota fiscal.</p>
+      </div>
+      <div class="result-footer"><button class="button primary" data-action="finish">Novo pedido <svg class="icon"><use href="#i-arrow"/></svg></button><p class="muted small" id="success-countdown"></p></div>
     </section>
   </main>
 
   <dialog id="customize-modal" class="dialog product-dialog" aria-labelledby="cust-prod-name">
-    <form id="customize-form"><div class="customize-scroll"><div class="customize-photo"><img id="cust-prod-image" alt=""><button type="button" class="icon-button close-dialog" data-close="customize-modal" aria-label="Fechar personalização"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="customize-body"><span class="eyebrow">UMA ESCOLHA DELICIOSA</span><h2 id="cust-prod-name"></h2><p id="cust-prod-description" class="muted"></p><fieldset id="cust-sizes-box"><legend>Escolha o tamanho <span class="optional">Escolha 1</span></legend><div id="cust-sizes-list" class="size-options"></div></fieldset><section id="cust-additions-box"><h3>Um toque a mais? <span class="optional">Opcional</span></h3><div id="cust-additions-list"></div></section></div></div><footer class="customize-footer"><div class="stepper"><button type="button" id="custom-qty-minus" aria-label="Diminuir quantidade"><svg class="icon"><use href="#i-minus"/></svg></button><output id="custom-quantity">1</output><button type="button" id="custom-qty-plus" aria-label="Aumentar quantidade"><svg class="icon"><use href="#i-plus"/></svg></button></div><button class="button primary" type="submit"><span>Adicionar</span><strong id="cust-total-calc"></strong><svg class="icon"><use href="#i-plus"/></svg></button></footer></form>
+    <form id="customize-form">
+      <div class="customize-scroll">
+        <div class="customize-body">
+          <header class="customize-header">
+            <div class="customize-photo"><img id="cust-prod-image" alt=""></div>
+            <div class="customize-intro">
+              <span class="eyebrow">UMA ESCOLHA DELICIOSA</span>
+              <h2 id="cust-prod-name"></h2>
+              <p id="cust-prod-description" class="muted"></p>
+            </div>
+            <button type="button" class="icon-button close-dialog" data-close="customize-modal" aria-label="Fechar personalização"><svg class="icon"><use href="#i-close"/></svg></button>
+          </header>
+          <fieldset id="cust-sizes-box">
+            <legend>Escolha o tamanho <span class="optional">Escolha 1</span></legend>
+            <div id="cust-sizes-list" class="size-options"></div>
+          </fieldset>
+          <section id="cust-additions-box">
+            <h3>Um toque a mais? <span class="optional">Opcional</span></h3>
+            <div id="cust-additions-list"></div>
+          </section>
+        </div>
+      </div>
+      <footer class="customize-footer">
+        <div class="stepper">
+          <button type="button" id="custom-qty-minus" aria-label="Diminuir quantidade"><svg class="icon"><use href="#i-minus"/></svg></button>
+          <output id="custom-quantity">1</output>
+          <button type="button" id="custom-qty-plus" aria-label="Aumentar quantidade"><svg class="icon"><use href="#i-plus"/></svg></button>
+        </div>
+        <button class="button primary" type="submit"><span>Adicionar</span><strong id="cust-total-calc"></strong><svg class="icon"><use href="#i-plus"/></svg></button>
+      </footer>
+    </form>
   </dialog>
   <dialog id="message-modal" class="dialog message-dialog" aria-labelledby="message-title"><span id="message-icon" class="message-icon"></span><h2 id="message-title"></h2><p id="message-description"></p><div class="dialog-actions"><button class="button primary" id="message-confirm">Continuar</button><button class="button secondary" id="message-secondary" hidden>Voltar</button></div></dialog>
-  <dialog id="payment-modal" class="dialog message-dialog" aria-labelledby="payment-title"><span class="message-icon" id="payment-illustration"></span><span class="eyebrow">PAGAMENTO DEMONSTRATIVO</span><h2 id="payment-title"></h2><p id="payment-description"></p><strong class="payment-modal-total" id="payment-modal-total"></strong><div id="payment-error" role="alert" hidden></div><div class="dialog-actions"><button class="button primary" id="approve-payment">Simular aprovação <svg class="icon"><use href="#i-check"/></svg></button><button class="button secondary" id="cancel-payment">Escolher outra forma</button></div></dialog>
-  <div id="toast" class="toast" role="status" hidden></div>
   </div>
 </body>
 </html>

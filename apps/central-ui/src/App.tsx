@@ -68,7 +68,7 @@ export default function App() {
             <CaixaView data={data} modal={cashModal} onModalChange={setCashModal} header={header} />
           ) : <>
           {header}
-          <div className={`flex-1 overflow-y-auto px-6 pt-2 pb-6 ${tab === "kds" ? "kds-scroll" : tab === "fiscal" ? "pdv-scroll" : ""}`} tabIndex={tab === "kds" ? 0 : undefined}>
+          <div className={`flex-1 overflow-y-auto px-6 pt-2 pb-6 ${tab === "kds" ? "kds-scroll" : tab === "fiscal" || tab === "overview" ? "pdv-scroll" : ""}`} tabIndex={tab === "kds" ? 0 : undefined}>
             {tab === "kds" && <KdsView data={data} />}
             {tab === "overview" && <OverviewView data={data} onOpenDanfe={openDanfe} />}
             {tab === "cardapio" && <CardapioView data={data} />}

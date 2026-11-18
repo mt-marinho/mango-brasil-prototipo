@@ -1,44 +1,38 @@
 'use strict';
 
-// Web simulator only: payment approval is explicit and never connects to an acquirer.
 const $ = (id) => document.getElementById(id);
 const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const CACHE_KEY = 'mango-kiosk-catalog-v2';
-const QUEUE_KEY = 'mango-kiosk-outbox-v2';
+const TICKET_KEY = 'mango-kiosk-demo-ticket';
 const MAX_QUANTITY = 20;
-const PAYMENT_NAMES = { PIX: 'Pix', CREDIT_CARD: 'crédito', DEBIT_CARD: 'débito' };
+const PAYMENT_STEPS = {
+  PIX: ['Escaneie o QR Code na maquininha', 'Aguardando pagamento…'],
+  CARD: ['Aproxime ou insira o cartão', 'Digite a senha na maquininha', 'Processando…']
+};
+const PAYMENT_ERRORS = {
+  recusado: 'Pagamento recusado.',
+  'tempo-esgotado': 'Tempo esgotado para o pagamento.'
+};
+const demoResult = new URLSearchParams(window.location.search).get('pagamento');
 let products = [];
 let categories = [];
 let cart = [];
 let currentCategory = 'all';
 let screen = 'attract';
 let customization = null;
-let lastActivity = Date.now();
-let idleWarning = false;
-let submitting = false;
+let paymentTimer;
+let paymentMethod;
+let selectedPayment = null;
+let ticketSequence = readStorage(TICKET_KEY, 0);
+if (!Number.isSafeInteger(ticketSequence) || ticketSequence < 0 || ticketSequence > 999) ticketSequence = 0;
 let catalogLoading = false;
 let catalogConnected = navigator.onLine;
-let sessionOrderKey = null;
 let successDeadline = 0;
-let toastTimeout;
-const savedQueue = readStorage(QUEUE_KEY, []);
-let queue = (Array.isArray(savedQueue) ? savedQueue : []).filter((entry) => entry?.payload?.idempotency_key);
-const inFlight = new Set();
 
 function readStorage(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; }
-}
-
-function uuidV7() {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  let timestamp = BigInt(Date.now());
-  for (let i = 5; i >= 0; i--) { bytes[i] = Number(timestamp & 255n); timestamp >>= 8n; }
-  bytes[6] = 0x70 | (bytes[6] & 15);
-  bytes[8] = 0x80 | (bytes[8] & 63);
-  const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 function imageUrl(value) {
@@ -54,39 +48,45 @@ function itemDetails(item) {
 
 function showScreen(next) {
   screen = next;
-  lastActivity = Date.now();
   document.querySelectorAll('.screen').forEach((element) => { element.hidden = element.id !== `screen-${next}`; });
-  const steps = ['menu', 'cart', 'checkout'];
-  $('order-progress').hidden = !steps.includes(next);
+  const steps = ['menu', 'checkout'];
+  const currentStep = next === 'payment' ? 'checkout' : next;
+  $('order-progress').hidden = !steps.includes(currentStep);
   document.querySelectorAll('[data-step]').forEach((step) => {
-    const active = step.dataset.step === next;
+    const active = step.dataset.step === currentStep;
     step.classList.toggle('active', active);
-    step.classList.toggle('complete', steps.indexOf(step.dataset.step) < steps.indexOf(next));
+    step.classList.toggle('complete', steps.indexOf(step.dataset.step) < steps.indexOf(currentStep));
     if (active) step.setAttribute('aria-current', 'step'); else step.removeAttribute('aria-current');
   });
   $(`screen-${next}`).querySelector('[tabindex="-1"]')?.focus({ preventScroll: true });
 }
 
-function resetOrder() {
+function resetOrder({ focusStart = true } = {}) {
   document.querySelectorAll('dialog[open]').forEach((dialog) => dialog.close());
   cart = [];
   customization = null;
-  sessionOrderKey = null;
-  idleWarning = false;
+  clearTimeout(paymentTimer);
+  paymentMethod = null;
+  selectedPayment = null;
+  updatePaymentSelection();
   successDeadline = 0;
-  $('toast').hidden = true;
-  document.querySelector('input[name="payment"][value="PIX"]').checked = true;
-  updatePaymentLabel();
+  $('checkout-form').reset();
+  $('success-name').textContent = '';
+  $('success-name').hidden = true;
   updateCart();
   showScreen('attract');
-  $('start-order').focus({ preventScroll: true });
+  if (focusStart) $('start-order').focus({ preventScroll: true });
 }
 
-function showToast(message) {
-  clearTimeout(toastTimeout);
-  $('toast').innerHTML = icon('check') + escapeHtml(message);
-  $('toast').hidden = false;
-  toastTimeout = setTimeout(() => { $('toast').hidden = true; }, 2600);
+function pulseCartBadge() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const badge = $('cart-badge');
+  badge.getAnimations().forEach((animation) => animation.cancel());
+  badge.animate([
+    { transform: 'scale(1)' },
+    { transform: 'scale(1.35)' },
+    { transform: 'scale(1)' }
+  ], { duration: 320, easing: 'ease-in-out' });
 }
 
 function showMessage(title, description, options = {}) {
@@ -96,17 +96,15 @@ function showMessage(title, description, options = {}) {
   $('message-confirm').textContent = options.confirm || 'Entendi';
   $('message-secondary').hidden = !options.secondary;
   $('message-secondary').textContent = options.secondary || '';
-  $('message-confirm').onclick = () => { $('message-modal').close(); options.onConfirm?.(); lastActivity = Date.now(); idleWarning = false; };
-  $('message-secondary').onclick = () => { $('message-modal').close(); options.onSecondary?.(); lastActivity = Date.now(); idleWarning = false; };
+  $('message-confirm').onclick = () => { $('message-modal').close(); options.onConfirm?.(); };
+  $('message-secondary').onclick = () => { $('message-modal').close(); options.onSecondary?.(); };
   if (!$('message-modal').open) $('message-modal').showModal();
 }
 
 function updateConnection() {
   const connected = navigator.onLine && catalogConnected;
-  $('connection-notice').hidden = connected && queue.length === 0;
-  $('connection-notice').textContent = queue.length
-    ? `${queue.length} ${queue.length === 1 ? 'pedido salvo, aguardando confirmação' : 'pedidos salvos, aguardando confirmação'}. O reenvio é automático.`
-    : 'Conexão indisponível. Você pode continuar escolhendo; seu pedido será salvo para reenvio.';
+  $('connection-notice').hidden = connected;
+  $('connection-notice').textContent = 'Conexão indisponível. Você pode continuar com o cardápio salvo, se disponível.';
 }
 
 async function fetchJson(url, options = {}) {
@@ -219,7 +217,7 @@ function saveCustomizedItem(event) {
   if (editing) cart[customization.cartIndex] = item; else cart.push(item);
   $('customize-modal').close();
   updateCart();
-  showToast(editing ? 'Pedido atualizado' : `${item.quantity}× ${item.product.name} no pedido`);
+  if (!editing) pulseCartBadge();
 }
 
 function updateCart() {
@@ -227,132 +225,85 @@ function updateCart() {
   const formatted = money(total());
   $('cart-badge').textContent = itemCount;
   $('kiosk-cart-count').textContent = itemCount ? `${itemCount} ${itemCount === 1 ? 'item no pedido' : 'itens no pedido'}` : 'Seu pedido está vazio';
-  ['kiosk-cart-total', 'cart-total', 'checkout-total-val', 'payment-total'].forEach((id) => { $(id).textContent = formatted; });
-  $('checkout-count').textContent = `${itemCount} ${itemCount === 1 ? 'item no seu pedido' : 'itens no seu pedido'}`;
+  $('kiosk-cart-total').textContent = formatted;
+  $('payment-total').textContent = formatted;
   $('btn-kiosk-checkout').disabled = !itemCount;
-  $('go-payment').disabled = !itemCount;
   $('cart-items').innerHTML = cart.map((item, index) => `<article class="cart-item"><img src="${imageUrl(item.product.imageUrl)}" alt=""><div><h3>${escapeHtml(item.product.name)}</h3><p>${escapeHtml(itemDetails(item))}</p><p>${money(item.unitCents / 100)} por unidade</p></div><strong class="cart-item-total">${money(item.unitCents * item.quantity / 100)}</strong><div class="cart-item-actions"><button class="edit-item" data-edit="${index}">Editar item</button><div class="stepper"><button data-cart="${index}" data-delta="-1" aria-label="${item.quantity === 1 ? 'Remover' : 'Diminuir'} ${escapeHtml(item.product.name)}">${icon(item.quantity === 1 ? 'trash' : 'minus')}</button><span class="qty" aria-label="Quantidade">${item.quantity}</span><button data-cart="${index}" data-delta="1" ${item.quantity >= MAX_QUANTITY ? 'disabled' : ''} aria-label="Aumentar ${escapeHtml(item.product.name)}">${icon('plus')}</button></div></div></article>`).join('');
-  if (!itemCount && screen === 'cart') showScreen('menu');
+  if (!itemCount && screen === 'checkout') showScreen('menu');
 }
 
-function updatePaymentLabel() {
-  const method = document.querySelector('input[name="payment"]:checked').value;
-  $('pay-button').innerHTML = `Continuar com ${PAYMENT_NAMES[method]} ${icon('arrow')}`;
+function openCheckout() {
+  if (!cart.length) return;
+  updateCart();
+  showScreen('checkout');
+  document.querySelector('.checkout-scroll').scrollTop = 0;
 }
 
-function openPayment() {
-  if (!cart.length || submitting) return;
-  const method = document.querySelector('input[name="payment"]:checked').value;
-  $('payment-illustration').innerHTML = icon(method === 'PIX' ? 'pix' : 'card');
-  $('payment-title').textContent = method === 'PIX' ? 'Pagamento com Pix' : `Cartão de ${PAYMENT_NAMES[method]}`;
-  $('payment-description').textContent = method === 'PIX'
-    ? 'Na versão integrada, o QR Code aparecerá aqui. Para testar o fluxo, simule a aprovação abaixo.'
-    : 'Na versão integrada, siga as instruções da maquininha. Aqui, você pode simular a aprovação sem usar um cartão.';
-  $('payment-modal-total').textContent = money(total());
-  $('payment-error').hidden = true;
-  $('approve-payment').disabled = false;
-  $('approve-payment').innerHTML = `Simular aprovação ${icon('check')}`;
-  $('payment-modal').showModal();
+function updatePaymentSelection() {
+  document.querySelectorAll('[data-payment]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.payment === selectedPayment));
+  });
+  $('finalize-order').disabled = !selectedPayment;
 }
 
-function makePayload() {
-  const key = uuidV7();
-  const method = document.querySelector('input[name="payment"]:checked').value;
-  return {
-    idempotency_key: key, origin: 'TOTEM', kioskId: 'totem-01',
-    items: cart.map((item, index) => ({
-      id: `${key}-${index}`, productId: item.product.id, productName: item.product.name,
-      sizeId: item.size?.id, sizeName: item.size?.name, unitPrice: item.unitCents / 100,
-      quantity: item.quantity, totalPrice: item.unitCents * item.quantity / 100,
-      additions: item.additions, fiscal: item.product.fiscal
-    })),
-    payments: [{ id: uuidV7(), idempotency_key: uuidV7(), method, amount: total(), status: 'APPROVED', paidAt: new Date().toISOString() }]
-  };
+function selectPayment(method) {
+  selectedPayment = method;
+  updatePaymentSelection();
 }
 
-async function approvePayment() {
-  if (submitting || !cart.length) return;
-  const entry = { payload: makePayload(), createdAt: new Date().toISOString() };
-  // Persist before sending so a timeout/reload retains the exact transaction and key.
-  try { localStorage.setItem(QUEUE_KEY, JSON.stringify([...queue, entry])); } catch {
-    $('payment-error').textContent = 'Não foi possível salvar o pedido neste navegador. Peça ajuda no balcão antes de continuar.';
-    $('payment-error').hidden = false;
-    return;
-  }
-  queue.push(entry);
-  sessionOrderKey = entry.payload.idempotency_key;
-  submitting = true;
-  $('approve-payment').disabled = true;
-  $('cancel-payment').disabled = true;
-  $('approve-payment').textContent = 'Confirmando pedido…';
-  try {
-    const order = await sendEntry(entry);
-    $('payment-modal').close();
-    if (order) showSuccess(order); else showPending(entry);
-  } finally {
-    submitting = false;
-    $('cancel-payment').disabled = false;
-    lastActivity = Date.now();
-    updateConnection();
-  }
-}
+function startPayment(method) {
+  if (!cart.length || !method) return;
 
-async function sendEntry(entry) {
-  const key = entry.payload.idempotency_key;
-  if (inFlight.has(key)) return null;
-  inFlight.add(key);
-  try {
-    const order = await fetchJson('/api/orders', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': key },
-      body: JSON.stringify(entry.payload)
-    });
-    queue = queue.filter((value) => value.payload.idempotency_key !== key);
-    try { localStorage.setItem(QUEUE_KEY, JSON.stringify(queue)); } catch { /* Server deduplicates a retained entry. */ }
-    catalogConnected = true;
-    return order;
-  } catch (error) {
-    if (error.status && error.status < 500) {
-      // A validation/conflict response requires operator review, not endless retries.
-      entry.needsReview = true;
-      try { localStorage.setItem(QUEUE_KEY, JSON.stringify(queue)); } catch { /* Retain in memory. */ }
-    } else { catalogConnected = false; }
-    return null;
-  } finally { inFlight.delete(key); updateConnection(); }
-}
+  clearTimeout(paymentTimer);
+  paymentMethod = method;
+  $('payment-recovery').hidden = true;
+  $('cancel-payment').hidden = false;
+  const status = $('payment-status');
+  status.classList.remove('failed');
+  showScreen('payment');
+  const steps = method === 'PIX' ? PAYMENT_STEPS.PIX : PAYMENT_STEPS.CARD;
+  let step = 0;
 
-async function syncQueue() {
-  if (submitting || !navigator.onLine) return;
-  $('retry-order').disabled = true;
-  try {
-    for (const entry of [...queue]) {
-      if (entry.needsReview) continue;
-      const order = await sendEntry(entry);
-      if (order && sessionOrderKey === entry.payload.idempotency_key && screen === 'pending') showSuccess(order);
+  function advance() {
+    if (step < steps.length) {
+      status.textContent = steps[step++];
+      paymentTimer = setTimeout(advance, 1700);
+      return;
     }
-  } finally { $('retry-order').disabled = false; }
+    if (!Object.hasOwn(PAYMENT_ERRORS, demoResult)) {
+      showSuccess();
+      return;
+    }
+    status.textContent = PAYMENT_ERRORS[demoResult];
+    status.classList.add('failed');
+    $('cancel-payment').hidden = true;
+    $('payment-recovery').hidden = false;
+    $('retry-payment').focus();
+  }
+
+  advance();
 }
 
-function showPending(entry) {
-  $('pending-title').textContent = entry.needsReview ? 'Seu pedido precisa de atenção' : 'Pedido salvo neste totem';
-  $('screen-pending').querySelector('.result-content>p').textContent = entry.needsReview
-    ? 'Não foi possível confirmar este pedido. Peça ajuda no balcão antes de fazer outro.'
-    : 'A conexão está instável. Vamos reenviar automaticamente quando ela voltar.';
-  $('screen-pending').querySelector('.pending-message').textContent = entry.needsReview
-    ? 'O pedido foi preservado para conferência. Não há senha de retirada confirmada.'
-    : 'Ainda não temos uma senha de retirada. Se precisar, peça ajuda no balcão.';
-  $('retry-order').hidden = Boolean(entry.needsReview);
-  showScreen('pending');
+function leavePayment() {
+  clearTimeout(paymentTimer);
+  paymentMethod = null;
+  showScreen('checkout');
+  document.querySelector('.payment-options').scrollIntoView({ block: 'nearest' });
 }
 
-function showSuccess(order) {
-  $('success-ticket-number').textContent = `#${order.publicTicketNumber}`;
-  $('success-receipt-total').textContent = money(order.total);
-  $('success-receipt-items').innerHTML = order.items.map((item) => `<div class="receipt-row"><span>${item.quantity}× ${escapeHtml(item.productName)}${item.sizeName ? ` · ${escapeHtml(item.sizeName)}` : ''}</span><span>${money(item.totalPrice)}</span></div>`).join('');
+function showSuccess() {
+  ticketSequence = ticketSequence % 999 + 1;
+  try { localStorage.setItem(TICKET_KEY, JSON.stringify(ticketSequence)); } catch { /* The sequence remains available for this session. */ }
+  $('success-ticket-number').textContent = `#${String(ticketSequence).padStart(3, '0')}`;
+  const firstName = $('order-name').value.trim().split(/\s+/)[0];
+  $('success-name').textContent = firstName;
+  $('success-name').hidden = !firstName;
+  $('checkout-form').reset();
   cart = [];
   updateCart();
   showScreen('success');
-  successDeadline = Date.now() + 45000;
-  $('success-countdown').textContent = 'Esta tela será encerrada em 45s';
+  successDeadline = Date.now() + 10000;
+  $('success-countdown').textContent = 'Voltando ao início em 10 s';
 }
 
 document.addEventListener('click', (event) => {
@@ -363,7 +314,7 @@ document.addEventListener('click', (event) => {
   if (button.dataset.action === 'cancel-order') confirmCancelOrder();
   if (button.dataset.action === 'finish') resetOrder();
   if (button.dataset.action === 'menu') showScreen('menu');
-  if (button.dataset.action === 'cart' && cart.length) { updateCart(); showScreen('cart'); }
+  if (button.dataset.payment && screen === 'checkout') selectPayment(button.dataset.payment);
   if (button.dataset.action === 'reload') loadCatalog();
   if (button.dataset.category) {
     currentCategory = button.dataset.category;
@@ -394,55 +345,40 @@ document.addEventListener('click', (event) => {
   }
 });
 
-$('start-order').onclick = () => { currentCategory = 'all'; showScreen('menu'); loadCatalog(); };
-$('btn-kiosk-checkout').onclick = () => { updateCart(); showScreen('cart'); };
-$('go-payment').onclick = () => { if (cart.length) { updateCart(); showScreen('checkout'); } };
+$('kiosk').onclick = () => {
+  if (screen !== 'attract') return;
+  currentCategory = 'all';
+  showScreen('menu');
+  loadCatalog();
+};
+$('btn-kiosk-checkout').onclick = openCheckout;
+$('finalize-order').onclick = () => startPayment(selectedPayment);
 $('customize-form').onsubmit = saveCustomizedItem;
 $('custom-qty-minus').onclick = () => { customization.quantity = Math.max(1, customization.quantity - 1); updateCustomization(); };
 $('custom-qty-plus').onclick = () => { customization.quantity = Math.min(MAX_QUANTITY, customization.quantity + 1); updateCustomization(); };
 $('cust-sizes-list').onchange = (event) => { customization.sizeId = event.target.value; updateCustomization(); };
-document.querySelector('.payment-options').onchange = updatePaymentLabel;
-function confirmCancelOrder() { showMessage('Cancelar seu pedido?', 'Os itens serão removidos e você voltará à tela inicial.', { icon: 'trash', confirm: 'Continuar meu pedido', secondary: 'Sim, cancelar pedido', onSecondary: resetOrder }); }
-$('cancel-order').onclick = confirmCancelOrder;
-$('pay-button').onclick = openPayment;
-$('approve-payment').onclick = approvePayment;
-$('cancel-payment').onclick = () => { if (!submitting) $('payment-modal').close(); };
-$('retry-order').onclick = syncQueue;
-$('payment-modal').addEventListener('cancel', (event) => { if (submitting) event.preventDefault(); });
-$('message-modal').addEventListener('cancel', () => { idleWarning = false; lastActivity = Date.now(); });
-['pointerdown', 'keydown', 'wheel', 'touchmove'].forEach((name) => document.addEventListener(name, () => { if (!idleWarning) lastActivity = Date.now(); }, { passive: true }));
-window.addEventListener('online', () => { loadCatalog(); syncQueue(); });
+$('checkout-form').onsubmit = (event) => event.preventDefault();
+function confirmCancelOrder() {
+  showMessage('Cancelar seu pedido?', 'Os itens serão removidos e você voltará à tela inicial.', {
+    icon: 'trash', confirm: 'Continuar meu pedido', secondary: 'Sim, cancelar pedido', onSecondary: resetOrder
+  });
+}
+$('cancel-payment').onclick = leavePayment;
+$('change-payment').onclick = leavePayment;
+$('retry-payment').onclick = () => startPayment(paymentMethod);
+window.addEventListener('online', loadCatalog);
 window.addEventListener('offline', updateConnection);
 document.addEventListener('error', (event) => {
   if (event.target.tagName === 'IMG' && !event.target.src.endsWith('/mango-mark.svg')) event.target.src = '/mango-mark.svg';
 }, true);
 
 setInterval(() => {
-  if (screen === 'success') {
-    const seconds = Math.max(0, Math.ceil((successDeadline - Date.now()) / 1000));
-    $('success-countdown').textContent = `Esta tela será encerrada em ${seconds}s`;
-    if (!seconds) resetOrder();
-    return;
-  }
-  if (['attract', 'pending'].includes(screen) || submitting) return;
-  const remaining = 120 - Math.floor((Date.now() - lastActivity) / 1000);
-  if (remaining <= 0) { resetOrder(); return; }
-  if (remaining <= 20) {
-    if (!idleWarning) {
-      idleWarning = true;
-      showMessage('Você ainda está por aqui?', '', { icon: 'clock', confirm: 'Sim, continuar pedido', secondary: 'Encerrar pedido', onSecondary: resetOrder });
-    }
-    $('message-description').textContent = `Seu pedido será encerrado em ${remaining}s por inatividade. Toque em continuar para manter seus itens.`;
-  }
+  if (screen !== 'success') return;
+  const seconds = Math.max(0, Math.ceil((successDeadline - Date.now()) / 1000));
+  $('success-countdown').textContent = `Voltando ao início em ${seconds} s`;
+  if (!seconds) resetOrder();
 }, 1000);
-setInterval(syncQueue, 15000);
-resetOrder();
-if (queue.length) {
-  const entry = queue[queue.length - 1];
-  sessionOrderKey = entry.payload.idempotency_key;
-  showPending(entry);
-  syncQueue();
-}
+resetOrder({ focusStart: false });
 updateConnection();
 // Preload now, so the welcome screen does not lead to an empty catalog.
 loadCatalog();
