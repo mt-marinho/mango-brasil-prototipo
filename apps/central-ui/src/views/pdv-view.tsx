@@ -29,6 +29,9 @@ const PAYMENTS: { method: PaymentMethod; label: string }[] = [
 ]
 
 function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: boolean }) {
+  if (method === "PIX") {
+    return <img src="/pix-icons8.png" alt="" aria-hidden="true" className="size-5 shrink-0 dark:invert" />
+  }
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -38,11 +41,6 @@ function PaymentIcon({ method, selected }: { method: PaymentMethod; selected: bo
           <rect x="3" y="6" width="18" height="12" rx="2" />
           <circle cx="12" cy="12" r="2.5" />
           <path d="M6 9h.01M18 15h.01" />
-        </>
-      ) : method === "PIX" ? (
-        <>
-          <path d="M9 3.5 5 7.5l4.2 4.2a4 4 0 0 0 5.6 0L19 7.5l-4-4a4.2 4.2 0 0 0-6 0Z" />
-          <path d="m9 20.5-4-4 4.2-4.2a4 4 0 0 1 5.6 0l4.2 4.2-4 4a4.2 4.2 0 0 1-6 0Z" />
         </>
       ) : (
         <>
