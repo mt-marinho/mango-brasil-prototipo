@@ -86,7 +86,7 @@ export function CardapioView({ data }: { data: CentralData }) {
                   </div>
                 </div>
                 <p className="mt-4 flex-1 text-xs leading-5 text-muted-foreground">{product.description}</p>
-                <div className="mt-4 flex items-center justify-between gap-3 border-t pt-4">
+                <div className="mt-4 flex items-center justify-between gap-3">
                   <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                     <GlIcon name={product.active ? "check-circle" : "pause"} className="size-4" />
                     {product.active ? "Disponível no cardápio" : "Indisponível no cardápio"}
