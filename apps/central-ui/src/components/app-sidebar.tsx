@@ -41,17 +41,9 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="pointer-events-none">
-              <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-sm font-black tracking-tighter text-primary-foreground">
-                MB
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-extrabold tracking-tight">MANGO BRASIL</span>
-                <span className="truncate font-mono text-[10px] font-semibold tracking-wider text-primary uppercase">
-                  Central de gestão
-                </span>
-              </div>
-            </SidebarMenuButton>
+            <div className="overflow-hidden px-2 py-4 text-sm font-extrabold tracking-tight whitespace-nowrap text-sidebar-foreground">
+              MANGO BRASIL
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -103,16 +95,6 @@ export function AppSidebar({
             >
               <GlIcon name="tablet" />
               <span>Abrir Totem Kiosk</span>
-              <GlIcon name="external-link" className="ml-auto" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Cockpit Mesa Redonda"
-              render={<a href="http://localhost:5050" target="_blank" rel="noreferrer" />}
-            >
-              <GlIcon name="orbit" />
-              <span>Cockpit Mesa Redonda</span>
               <GlIcon name="external-link" className="ml-auto" />
             </SidebarMenuButton>
           </SidebarMenuItem>
