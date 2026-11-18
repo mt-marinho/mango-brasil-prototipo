@@ -5,7 +5,7 @@ import { ORDER_STATUS, StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 import { elapsed } from "@/lib/format"
-import type { OrderStatus } from "@/lib/types"
+import type { Order, OrderStatus } from "@/lib/types"
 import type { CentralData } from "@/lib/use-central-data"
 import { cn } from "@/lib/utils"
 
@@ -22,9 +22,36 @@ const ORIGINS: Record<string, string> = {
   DELIVERY: "Delivery",
 }
 
+function exampleOrders(): Order[] {
+  const examples = [
+    { ticket: "036", origin: "TOTEM", items: [["Manga Picante da Casa", 2], ["Suco de Manga Natural", 1]] as const, minutes: 150 },
+    { ticket: "035", origin: "PDV_ASSISTIDO", items: [["Combo Dupla Tropical", 1]] as const, minutes: 195 },
+    { ticket: "034", origin: "TOTEM", items: [["Manga Limão & Sal", 1], ["Manga Fogo Tropical", 1]] as const, minutes: 240 },
+    { ticket: "033", origin: "PDV_ASSISTIDO", items: [["Manga Agridoce", 2]] as const, minutes: 290 },
+  ]
+  return examples.map(({ ticket, origin, items, minutes }) => ({
+    id: `kds-example-${ticket}`,
+    publicTicketNumber: ticket,
+    origin,
+    status: "DELIVERED",
+    total: 0,
+    payments: [],
+    createdAt: new Date(Date.now() - minutes * 60_000).toISOString(),
+    items: items.map(([productName, quantity], index) => ({
+      id: `kds-example-${ticket}-${index}`,
+      productId: "",
+      productName,
+      quantity,
+      unitPrice: 0,
+      totalPrice: 0,
+    })),
+  }))
+}
+
 export function KdsView({ data }: { data: CentralData }) {
   const [pending, setPending] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [examples] = useState(exampleOrders)
   const [, setClock] = useState(0)
 
   useEffect(() => {
@@ -50,6 +77,8 @@ export function KdsView({ data }: { data: CentralData }) {
     { status: "PREPARING", label: "Em preparo" },
     { status: "READY", label: "Prontos" },
   ].map((item) => ({ ...item, count: data.kdsOrders.filter((order) => order.status === item.status).length }))
+  const history = [...data.orders.filter((order) => order.status === "DELIVERED"), ...examples]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   return (
     <div className="space-y-6">
@@ -128,6 +157,29 @@ export function KdsView({ data }: { data: CentralData }) {
           })}
         </div>
       )}
+      <section aria-labelledby="kds-history-title" className="overflow-hidden rounded-xl border bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
+          <div>
+            <h2 id="kds-history-title" className="text-sm font-semibold">Histórico de pedidos</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Pedidos entregues e exemplos de demonstração.</p>
+          </div>
+          <span className="text-xs text-muted-foreground">{history.length} {history.length === 1 ? "pedido" : "pedidos"}</span>
+        </div>
+        <div className="divide-y">
+          {history.map((order) => (
+            <div key={order.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold tabular-nums">#{order.publicTicketNumber} <span className="ml-2 text-xs font-normal text-muted-foreground">{ORIGINS[order.origin] ?? order.origin}{order.id.startsWith("kds-example-") ? " · Exemplo" : ""}</span></p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{order.items.map((item) => `${item.quantity}× ${item.productName}`).join(" · ")}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</span>
+                <StatusBadge tone="neutral" icon="check" className="font-sans text-xs font-medium normal-case">Entregue</StatusBadge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
