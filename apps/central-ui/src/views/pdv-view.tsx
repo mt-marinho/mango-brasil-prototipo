@@ -136,7 +136,7 @@ export function PdvView({
     <div className="pdv-scroll flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <section aria-label="Produtos" className="flex min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1">
         {header}
-        <div className="flex flex-col gap-4 px-4 pt-3 pb-4 sm:px-6 sm:pt-4 sm:pb-6 lg:min-h-0 lg:flex-1">
+        <div className="flex flex-col gap-4 px-4 pt-2 pb-4 sm:px-6 sm:pb-6 lg:min-h-0 lg:flex-1">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Produtos</h1>

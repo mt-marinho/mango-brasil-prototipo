@@ -47,7 +47,7 @@ export default function App() {
     setDanfeOrder(data.orders.find((o) => o.id === orderId) ?? null)
 
   const header = (
-    <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b px-4 py-3">
+    <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3">
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger />
         <Separator orientation="vertical" className="data-vertical:h-4 data-vertical:self-center" />
@@ -55,17 +55,6 @@ export default function App() {
           <h2 className="truncate text-sm leading-none font-medium text-foreground">{current.title}</h2>
         </nav>
       </div>
-      {tab === "caixa" && <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-        <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!data.shift} onClick={() => setCashModal("sangria")}>
-          <GlIcon name="arrow-down" /> Sangria
-        </Button>
-        <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!data.shift} onClick={() => setCashModal("suprimento")}>
-          <GlIcon name="arrow-up" /> Suprimento
-        </Button>
-        <Button className="h-9 flex-1 px-3 sm:flex-none" disabled={!data.shift} onClick={() => setCashModal("fechamento")}>
-          <GlIcon name="lock" /> Fechar turno
-        </Button>
-      </div>}
       {tab !== "pdv" && tab !== "caixa" && <Button variant="outline" size="icon" title="Atualizar dados" aria-label="Atualizar dados"
         onClick={() => void data.reload()}>
         <GlIcon name="retry" />
@@ -82,7 +71,7 @@ export default function App() {
             <PdvView data={data} onSaleCompleted={setDanfeOrder} header={header} />
           ) : <>
           {header}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto px-6 pt-2 pb-6">
             {tab === "kds" && <KdsView data={data} />}
             {tab === "caixa" && <CaixaView data={data} modal={cashModal} onModalChange={setCashModal} />}
             {tab === "overview" && <OverviewView data={data} onOpenDanfe={openDanfe} />}

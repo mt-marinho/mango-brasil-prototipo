@@ -56,23 +56,32 @@ export function CaixaView({ data, modal, onModalChange }: {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6">
       <section aria-labelledby="cash-overview-title" className="space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 id="cash-overview-title" className="text-xl font-bold tracking-tight">Turno atual</h1>
             <p className="mt-1 text-sm text-muted-foreground">Acompanhe os valores e as movimentações do caixa.</p>
           </div>
-          <StatusBadge tone={shift ? "success" : "neutral"} icon={shift ? "check-circle" : "lock"} className="h-7 font-sans text-xs font-semibold">
-            {shift ? "Turno aberto" : "Turno fechado"}
-          </StatusBadge>
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("sangria")}>
+              <GlIcon name="arrow-down" /> Sangria
+            </Button>
+            <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("suprimento")}>
+              <GlIcon name="arrow-up" /> Suprimento
+            </Button>
+            <Button className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("fechamento")}>
+              <GlIcon name="lock" /> Fechar turno
+            </Button>
+          </div>
         </div>
 
-        {shift && (opened || shift.operatorName) && (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted-foreground">
+            <StatusBadge tone={shift ? "success" : "neutral"} icon={shift ? "check-circle" : "lock"} className="h-7 font-sans text-xs font-semibold">
+              {shift ? "Turno aberto" : "Turno fechado"}
+            </StatusBadge>
             {opened && <span>Aberto em {opened}</span>}
-            {opened && shift.operatorName && <span aria-hidden="true">·</span>}
-            {shift.operatorName && <span>Operador: {shift.operatorName}</span>}
+            {opened && shift?.operatorName && <span aria-hidden="true">·</span>}
+            {shift?.operatorName && <span>Operador: {shift.operatorName}</span>}
           </div>
-        )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {metrics.map((metric) => (
