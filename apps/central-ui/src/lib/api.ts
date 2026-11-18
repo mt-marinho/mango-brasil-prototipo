@@ -21,6 +21,8 @@ export const api = {
   totems: () => request<Totem[]>("/api/totems"),
   currentShift: () =>
     request<{ open: boolean; shift?: Shift }>("/api/shifts/current"),
+  openShift: (body: { operatorName: string; initialCash: number; terminalId: string }) =>
+    request<Shift>("/api/shifts/open", json("POST", body)),
   toggleProduct: (id: string) =>
     request<{ success: boolean }>(`/api/products/${id}/toggle`, { method: "PATCH" }),
   createOrder: (payload: unknown) =>

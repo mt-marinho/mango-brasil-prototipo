@@ -1,388 +1,106 @@
 import { useState } from "react"
-
 import { GlIcon } from "@/components/gl-icon"
 import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { api } from "@/lib/api"
 import { brl } from "@/lib/format"
+import type { CashMovement, Shift } from "@/lib/types"
 import type { CentralData } from "@/lib/use-central-data"
+import { MovementDialog } from "./cash-movement-dialog"
 
 export type CashModal = null | "sangria" | "suprimento" | "fechamento"
+type Totals = { cash: number; pix: number; credit: number; debit: number }
+type RecordShift = { id: string; operator: string; terminal: string; openedAt: string; closedAt?: string; initial: number; expected: Totals; counted?: Totals; observation?: string; movements: CashMovement[]; status: "OPEN" | "CLOSED" }
+const HISTORY_KEY = "mango-cash-demo-history-v1"
+const dateTime = (date?: string) => date ? new Date(date).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—"
+const localDay = (date: string) => { const d = new Date(date); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` }
+const paymentNames: { key: keyof Totals; label: string }[] = [{ key: "cash", label: "Dinheiro" }, { key: "pix", label: "Pix" }, { key: "credit", label: "Crédito" }, { key: "debit", label: "Débito" }]
+const labels: Record<string, string> = { INITIAL_SUPPLY: "Abertura", SUPPLY: "Suprimento", BLEED_SANGRIA: "Sangria", ORDER_PAYMENT: "Venda" }
+const differenceText = (n: number) => Math.abs(n) < 0.005 ? "Caixa conferido" : n > 0 ? `Sobra de ${brl(n)}` : `Falta de ${brl(Math.abs(n))}`
 
-const MOVEMENT_LABELS: Record<string, { label: string; icon: string; tone: "success" | "danger" | "info" }> = {
-  INITIAL_SUPPLY: { label: "Abertura", icon: "arrow-up", tone: "success" },
-  SUPPLY: { label: "Suprimento", icon: "arrow-up", tone: "success" },
-  BLEED_SANGRIA: { label: "Sangria", icon: "arrow-down", tone: "danger" },
-  ORDER_PAYMENT: { label: "Venda", icon: "credit-card", tone: "info" },
+function sampleHistory(): RecordShift[] {
+  return [1, 2, 4].map((days, i) => {
+    const opened = new Date(); opened.setDate(opened.getDate() - days); opened.setHours(9, 0, 0, 0)
+    const closed = new Date(opened); closed.setHours(18, 0)
+    const initial = 150, expected = { cash: 280 + i * 25, pix: 245 + i * 30, credit: 120 + i * 20, debit: 90 + i * 10 }
+    return { id: `exemplo-${days}`, operator: i === 1 ? "Mariana Souza" : "Lucas Atendente", terminal: "CAIXA-BALCAO-01", openedAt: opened.toISOString(), closedAt: closed.toISOString(), initial, expected, counted: { ...expected, cash: expected.cash + (i === 1 ? -5 : i === 2 ? 10 : 0) }, observation: i === 1 ? "Diferença identificada na contagem." : "", status: "CLOSED", movements: [
+      { id: `abertura-${days}`, type: "INITIAL_SUPPLY", amount: initial, description: "Fundo inicial para troco", operatorName: i === 1 ? "Mariana Souza" : "Lucas Atendente", createdAt: opened.toISOString() },
+      { id: `suprimento-${days}`, type: "SUPPLY", amount: 50, description: "Reforço de troco", operatorName: i === 1 ? "Mariana Souza" : "Lucas Atendente", createdAt: new Date(opened.getTime() + 3 * 3600000).toISOString() },
+      { id: `sangria-${days}`, type: "BLEED_SANGRIA", amount: 100, description: "Recolhimento para o cofre", operatorName: i === 1 ? "Mariana Souza" : "Lucas Atendente", createdAt: new Date(opened.getTime() + 6 * 3600000).toISOString() },
+    ] }
+  })
+}
+function loadHistory(): RecordShift[] { try { const saved = localStorage.getItem(HISTORY_KEY); return saved ? JSON.parse(saved) : sampleHistory() } catch { return sampleHistory() } }
+function currentRecord(shift: Shift): RecordShift {
+  const get = (method: string) => shift.reconciliation.find((r) => r.method === method)?.systemCalculatedAmount ?? 0
+  return { id: "atual", operator: shift.operatorName || "Operador", terminal: shift.terminalId || "Caixa balcão", openedAt: shift.openedAt || new Date().toISOString(), initial: shift.movements.find((m) => m.type === "INITIAL_SUPPLY")?.amount ?? 0, expected: { cash: shift.finalCalculatedCash, pix: get("PIX"), credit: get("CREDIT_CARD"), debit: get("DEBIT_CARD") }, movements: shift.movements, status: "OPEN" }
+}
+function receiptText(record: RecordShift) {
+  const lines = ["MANGO BRASIL — RESUMO DE TURNO", "DADOS DE DEMONSTRAÇÃO", "", `Operador: ${record.operator}`, `Caixa: ${record.terminal}`, `Abertura: ${dateTime(record.openedAt)}`, `Fechamento: ${dateTime(record.closedAt)}`, `Fundo inicial: ${brl(record.initial)}`, "", "VALORES ESPERADOS E INFORMADOS", ...paymentNames.map(({key,label}) => `${label}: ${brl(record.expected[key])} / ${record.counted ? brl(record.counted[key]) : "—"}`), `Diferença em dinheiro: ${record.counted ? differenceText(record.counted.cash - record.expected.cash) : "—"}`, `Observação: ${record.observation || "Nenhuma"}`, "", "MOVIMENTAÇÕES", ...record.movements.map(m => `${dateTime(m.createdAt)} · ${labels[m.type] || "Movimentação"} · ${m.description} · ${brl(m.amount)}`)]
+  return lines.join("\n")
+}
+function downloadReceipt(record: RecordShift) { const url = URL.createObjectURL(new Blob([receiptText(record)], { type: "text/plain;charset=utf-8" })); const a = document.createElement("a"); a.href = url; a.download = `resumo-caixa-${localDay(record.openedAt)}.txt`; a.click(); URL.revokeObjectURL(url) }
+function printReceipt(record: RecordShift) { const frame = document.createElement("iframe"); frame.style.cssText = "position:fixed;width:0;height:0;border:0"; document.body.appendChild(frame); const doc = frame.contentDocument; if (!doc) { frame.remove(); return }; const pre = doc.createElement("pre"); pre.style.cssText = "white-space:pre-wrap;font:14px/1.6 sans-serif"; pre.textContent = receiptText(record); doc.body.appendChild(pre); frame.contentWindow?.focus(); frame.contentWindow?.print(); window.setTimeout(() => frame.remove(), 1000) }
+
+export function CaixaView({ data, modal, onModalChange }: { data: CentralData; modal: CashModal; onModalChange: (modal: CashModal) => void }) {
+  const [history, setHistory] = useState<RecordShift[]>(loadHistory)
+  const [tab, setTab] = useState("current")
+  const [selected, setSelected] = useState<string | null>(null)
+  const [date, setDate] = useState("")
+  const [operator, setOperator] = useState("")
+  const [status, setStatus] = useState("all")
+  const [opening, setOpening] = useState(false)
+  const [receipt, setReceipt] = useState<RecordShift | null>(null)
+  const [confirmation, setConfirmation] = useState<RecordShift | null>(null)
+  const current = data.shift ? currentRecord(data.shift) : null
+  const records = [...(current ? [current] : []), ...history]
+  const filtered = records.filter(r => (!date || localDay(r.openedAt) === date) && (!operator || r.operator === operator) && (status === "all" || r.status === status))
+  const chosen = tab === "current" ? current : filtered.find(r => r.id === selected) ?? null
+  const operators = [...new Set(records.map(r => r.operator))]
+  function saveClosed(record: RecordShift) { const next = [record, ...history]; setHistory(next); try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)) } catch { /* o protótipo continua disponível nesta sessão */ }; setConfirmation(record) }
+  const selectClass = "h-10 w-full rounded-lg border bg-background px-3 text-sm text-foreground"
+  return <div className="mx-auto max-w-[1600px] space-y-5">
+    <div className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-xl font-semibold tracking-tight">Caixa e turnos</h1><p className="mt-1 text-sm text-muted-foreground">Acompanhe o caixa atual e consulte turnos anteriores.</p></div>{tab === "current" && <div className="flex flex-wrap gap-2">{current ? <><Button variant="outline" onClick={() => onModalChange("sangria")}><GlIcon name="arrow-down" /> Sangria</Button><Button variant="outline" onClick={() => onModalChange("suprimento")}><GlIcon name="arrow-up" /> Suprimento</Button><Button onClick={() => onModalChange("fechamento")}><GlIcon name="lock" /> Fechar turno</Button></> : <Button onClick={() => setOpening(true)}><GlIcon name="plus" /> Abrir caixa</Button>}</div>}</div>
+    <Tabs value={tab} onValueChange={(value) => { setTab(String(value)); setSelected(null) }}>
+      <TabsList className="h-10 justify-start"><TabsTrigger value="current" className="px-4">Turno atual</TabsTrigger><TabsTrigger value="history" className="px-4">Histórico de turnos</TabsTrigger></TabsList>
+      <div className="mt-4 grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,440px)]">
+        <div className="min-w-0">
+          <TabsContent value="current">{current ? <div className="space-y-5"><div className="flex flex-wrap items-center gap-3"><StatusBadge tone="success" icon="check-circle" className="font-sans normal-case">Turno aberto</StatusBadge><span className="text-sm text-muted-foreground">Aberto em {dateTime(current.openedAt)} · {current.operator}</span></div><div className="grid gap-3 sm:grid-cols-3">{[{label:"Dinheiro em caixa", value:current.expected.cash}, {label:"Vendas no cartão", value:current.expected.credit + current.expected.debit}, {label:"Vendas em Pix", value:current.expected.pix}].map(m => <div key={m.label} className="rounded-xl border bg-card p-5"><p className="text-sm text-muted-foreground">{m.label}</p><p className="mt-3 text-2xl font-semibold tabular-nums">{brl(m.value)}</p></div>)}</div><MovementList movements={current.movements} /></div> : <div className="rounded-xl border bg-card px-6 py-16 text-center"><h2 className="font-semibold">Nenhum caixa aberto</h2><p className="mt-2 text-sm text-muted-foreground">Abra um turno para começar a registrar as movimentações.</p><Button className="mt-5" onClick={() => setOpening(true)}><GlIcon name="plus" /> Abrir caixa</Button></div>}</TabsContent>
+          <TabsContent value="history"><div className="space-y-4"><div className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-3"><div className="space-y-2"><Label htmlFor="history-date">Data de abertura</Label><Input id="history-date" type="date" value={date} onChange={e => setDate(e.target.value)} /></div><div className="space-y-2"><Label htmlFor="history-operator">Operador</Label><select id="history-operator" className={selectClass} value={operator} onChange={e => setOperator(e.target.value)}><option value="">Todos os operadores</option>{operators.map(o => <option key={o}>{o}</option>)}</select></div><div className="space-y-2"><Label htmlFor="history-status">Situação</Label><select id="history-status" className={selectClass} value={status} onChange={e => setStatus(e.target.value)}><option value="all">Todos os turnos</option><option value="OPEN">Aberto</option><option value="CLOSED">Fechado</option></select></div></div><div className="overflow-hidden rounded-xl border bg-card"><div className="border-b px-5 py-4"><h2 className="font-semibold">Turnos registrados</h2><p className="mt-1 text-xs text-muted-foreground">Selecione um turno para consultar os detalhes. Dados de demonstração.</p></div>{filtered.length ? <div className="divide-y">{filtered.map(r => <button key={r.id} type="button" onClick={() => setSelected(r.id)} aria-pressed={selected === r.id} className={`flex w-full flex-wrap items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/50 ${selected === r.id ? "bg-muted/60" : ""}`}><div><p className="text-sm font-medium">{dateTime(r.openedAt)}</p><p className="mt-1 text-xs text-muted-foreground">{r.operator} · {r.terminal}</p></div><div className="flex items-center gap-4"><StatusBadge tone={r.status === "OPEN" ? "success" : "neutral"} icon={r.status === "OPEN" ? "check-circle" : "lock"} className="font-sans normal-case">{r.status === "OPEN" ? "Aberto" : "Fechado"}</StatusBadge><span className="text-sm font-semibold tabular-nums">{brl(r.expected.cash)}</span><GlIcon name="chevron-right" /></div></button>)}</div> : <div className="px-5 py-12 text-center text-sm text-muted-foreground">Nenhum turno encontrado para os filtros selecionados.</div>}</div></div></TabsContent>
+        </div>
+        <aside className="rounded-xl border bg-card xl:sticky xl:top-2">{chosen ? <ShiftDetails record={chosen} onReceipt={() => setReceipt(chosen)} /> : <div className="px-6 py-14 text-center"><h2 className="font-semibold">Detalhes do caixa</h2><p className="mt-2 text-sm text-muted-foreground">{tab === "history" ? "Selecione um turno na lista para ver as informações." : "Os detalhes aparecerão aqui quando um turno for aberto."}</p></div>}</aside>
+      </div>
+    </Tabs>
+    <OpeningDialog open={opening} onClose={() => setOpening(false)} onDone={data.reload} />
+    <MovementDialog kind="sangria" open={modal === "sangria"} onClose={() => onModalChange(null)} onDone={data.reload} /><MovementDialog kind="suprimento" open={modal === "suprimento"} onClose={() => onModalChange(null)} onDone={data.reload} />
+    {current && <ClosingDialog open={modal === "fechamento"} record={current} onClose={() => onModalChange(null)} onDone={async r => { saveClosed(r); await data.reload() }} />}
+    <Dialog open={!!confirmation} onOpenChange={open => { if (!open) setConfirmation(null) }}><DialogContent><DialogHeader><DialogTitle>Turno fechado com sucesso</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">O resumo do turno está disponível no histórico de demonstração.</p>{confirmation?.counted && <p className="rounded-lg border bg-muted/40 p-4 text-sm font-semibold">{differenceText(confirmation.counted.cash - confirmation.expected.cash)}</p>}<DialogFooter><Button variant="outline" onClick={() => { setConfirmation(null); setTab("history"); setSelected(confirmation?.id ?? null) }}>Ver no histórico</Button><Button onClick={() => { setReceipt(confirmation); setConfirmation(null) }}>Ver comprovante</Button></DialogFooter></DialogContent></Dialog>
+    <Dialog open={!!receipt} onOpenChange={open => { if (!open) setReceipt(null) }}><DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto"><DialogHeader><DialogTitle>Prévia do comprovante</DialogTitle></DialogHeader><pre className="whitespace-pre-wrap rounded-lg border bg-background p-4 font-sans text-xs leading-relaxed">{receipt && receiptText(receipt)}</pre><DialogFooter><Button variant="outline" onClick={() => receipt && printReceipt(receipt)}>Imprimir</Button><Button onClick={() => receipt && downloadReceipt(receipt)}>Baixar resumo</Button></DialogFooter></DialogContent></Dialog>
+  </div>
 }
 
-export function CaixaView({ data, modal, onModalChange }: {
-  data: CentralData
-  modal: CashModal
-  onModalChange: (modal: CashModal) => void
-}) {
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const shift = data.shift
-  const movements = shift?.movements ?? []
-  const reconciled = (method: string) =>
-    shift?.reconciliation.find((r) => r.method === method)?.systemCalculatedAmount ?? 0
-  const cardTotal = reconciled("CREDIT_CARD") + reconciled("DEBIT_CARD")
-  const opened = shift?.openedAt
-    ? new Date(shift.openedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
-    : null
+function MovementList({ movements }: { movements: CashMovement[] }) { return <section className="overflow-hidden rounded-xl border bg-card"><div className="flex items-center justify-between gap-3 border-b px-5 py-4"><div><h2 className="font-semibold">Movimentações do turno</h2><p className="mt-1 text-xs text-muted-foreground">Entradas, retiradas e vendas em dinheiro.</p></div><span className="text-xs text-muted-foreground">{movements.length} {movements.length === 1 ? "registro" : "registros"}</span></div>{movements.length ? <ul className="divide-y">{movements.slice().reverse().map(m => <li key={m.id} className="flex items-center justify-between gap-4 px-5 py-4"><div><p className="text-sm font-medium">{labels[m.type] || "Movimentação"}</p><p className="mt-1 text-xs text-muted-foreground">{m.description} · {dateTime(m.createdAt)} · {m.operatorName}</p></div><span className="shrink-0 text-sm font-medium tabular-nums">{m.type === "BLEED_SANGRIA" ? "−" : "+"} {brl(m.amount)}</span></li>)}</ul> : <p className="p-6 text-sm text-muted-foreground">Ainda não há movimentações neste turno.</p>}</section> }
 
-  const metrics = [
-    { label: "Dinheiro em caixa", value: shift ? brl(shift.finalCalculatedCash) : "—", hint: "Saldo atual em dinheiro" },
-    { label: "Vendas no cartão", value: shift ? brl(cardTotal) : "—", hint: "Crédito e débito" },
-    { label: "Vendas em Pix", value: shift ? brl(reconciled("PIX")) : "—", hint: "Pagamentos recebidos" },
-  ]
-
-  return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <section aria-labelledby="cash-overview-title" className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 id="cash-overview-title" className="text-xl font-bold tracking-tight">Turno atual</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Acompanhe os valores e as movimentações do caixa.</p>
-          </div>
-          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-            <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("sangria")}>
-              <GlIcon name="arrow-down" /> Sangria
-            </Button>
-            <Button variant="outline" className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("suprimento")}>
-              <GlIcon name="arrow-up" /> Suprimento
-            </Button>
-            <Button className="h-9 flex-1 px-3 sm:flex-none" disabled={!shift} onClick={() => onModalChange("fechamento")}>
-              <GlIcon name="lock" /> Fechar turno
-            </Button>
-          </div>
-        </div>
-
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-xs text-muted-foreground">
-            {shift ? (
-              <button type="button" onClick={() => setDetailsOpen(true)} className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label="Ver detalhes do turno aberto">
-                <StatusBadge tone="success" icon="check-circle" className="h-7 cursor-pointer font-sans text-xs font-semibold hover:opacity-80">
-                  Turno aberto · Ver detalhes
-                </StatusBadge>
-              </button>
-            ) : (
-              <StatusBadge tone="neutral" icon="lock" className="h-7 font-sans text-xs font-semibold">Turno fechado</StatusBadge>
-            )}
-            {opened && <span>Aberto em {opened}</span>}
-            {opened && shift?.operatorName && <span aria-hidden="true">·</span>}
-            {shift?.operatorName && <span>Operador: {shift.operatorName}</span>}
-          </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {metrics.map((metric) => (
-            <div key={metric.label} className="rounded-xl border bg-card px-5 py-4">
-              <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
-              <p className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">{metric.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{metric.hint}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="cash-movements-title" className="overflow-hidden rounded-xl border bg-card">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
-          <div>
-            <h2 id="cash-movements-title" className="text-base font-semibold">Movimentações do turno</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Histórico de entradas, retiradas e vendas do caixa.</p>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {movements.length === 1 ? "1 movimentação" : movements.length + " movimentações"}
-          </span>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead className="h-11 pl-5 text-xs text-muted-foreground">Horário</TableHead>
-              <TableHead className="text-xs text-muted-foreground">Tipo</TableHead>
-              <TableHead className="text-xs text-muted-foreground">Descrição</TableHead>
-              <TableHead className="text-xs text-muted-foreground">Operador</TableHead>
-              <TableHead className="pr-5 text-right text-xs text-muted-foreground">Valor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {movements.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-5 py-10 text-center text-sm text-muted-foreground">
-                  {shift ? "Ainda não há movimentações neste turno." : "Não há turno aberto no momento."}
-                </TableCell>
-              </TableRow>
-            ) : movements.slice().reverse().map((movement) => {
-              const config = MOVEMENT_LABELS[movement.type] ?? { label: "Movimentação", icon: "doc-text", tone: "info" as const }
-              const sangria = movement.type === "BLEED_SANGRIA"
-              return (
-                <TableRow key={movement.id}>
-                  <TableCell className="py-4 pl-5 text-sm text-muted-foreground tabular-nums">
-                    {new Date(movement.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge tone={config.tone} icon={config.icon} className="font-sans text-xs font-medium normal-case">
-                      {config.label}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate text-sm" title={movement.description}>{movement.description}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{movement.operatorName}</TableCell>
-                  <TableCell className="pr-5 text-right text-sm font-semibold tabular-nums">
-                    {sangria ? "−" : "+"} {brl(movement.amount)}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </section>
-
-      <Sheet open={detailsOpen && !!shift} onOpenChange={setDetailsOpen}>
-        <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
-          <SheetHeader className="border-b px-6 py-5 pr-14">
-            <SheetTitle className="text-lg font-semibold">Detalhes do caixa</SheetTitle>
-            <SheetDescription>Informações e movimentações do turno atual.</SheetDescription>
-          </SheetHeader>
-          {shift && <div className="flex-1 space-y-7 overflow-y-auto px-6 py-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">Turno atual</p>
-                <p className="mt-1 text-xs text-muted-foreground">{shift.terminalId || "Caixa balcão"}</p>
-              </div>
-              <StatusBadge tone="success" icon="check-circle" className="h-7 font-sans text-xs font-semibold">Turno aberto</StatusBadge>
-            </div>
-            <dl className="grid grid-cols-2 gap-4 rounded-xl border bg-card p-4 text-sm">
-              <div><dt className="text-xs text-muted-foreground">Operador</dt><dd className="mt-1 font-medium">{shift.operatorName || "Não informado"}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">Abertura</dt><dd className="mt-1 font-medium">{opened || "Não informada"}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">Fundo inicial</dt><dd className="mt-1 font-medium tabular-nums">{brl(movements.find((m) => m.type === "INITIAL_SUPPLY")?.amount ?? 0)}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">Dinheiro em caixa</dt><dd className="mt-1 font-semibold tabular-nums">{brl(shift.finalCalculatedCash)}</dd></div>
-            </dl>
-            <section aria-labelledby="cash-details-payments">
-              <h3 id="cash-details-payments" className="text-sm font-semibold">Vendas por forma de pagamento</h3>
-              <div className="mt-3 space-y-3 text-sm">
-                {[
-                  ["Dinheiro", movements.filter((m) => m.type === "ORDER_PAYMENT").reduce((sum, m) => sum + m.amount, 0)],
-                  ["Pix", reconciled("PIX")],
-                  ["Cartão de crédito", reconciled("CREDIT_CARD")],
-                  ["Cartão de débito", reconciled("DEBIT_CARD")],
-                ].map(([label, amount]) => <div key={label} className="flex justify-between gap-4"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{brl(Number(amount))}</span></div>)}
-              </div>
-            </section>
-            <section aria-labelledby="cash-details-movements">
-              <div className="flex items-center justify-between gap-3"><h3 id="cash-details-movements" className="text-sm font-semibold">Movimentações</h3><span className="text-xs text-muted-foreground">{movements.length} {movements.length === 1 ? "registro" : "registros"}</span></div>
-              {movements.length ? <ul className="mt-2 divide-y">{movements.slice().reverse().map((movement) => {
-                const config = MOVEMENT_LABELS[movement.type] ?? { label: "Movimentação" }
-                return <li key={movement.id} className="flex justify-between gap-4 py-3 text-sm"><div className="min-w-0"><p className="font-medium">{config.label}</p><p className="mt-1 break-words text-xs text-muted-foreground">{movement.description}</p><p className="mt-1 text-xs text-muted-foreground">{new Date(movement.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {movement.operatorName}</p></div><span className="shrink-0 font-medium tabular-nums">{movement.type === "BLEED_SANGRIA" ? "−" : "+"} {brl(movement.amount)}</span></li>
-              })}</ul> : <p className="mt-3 text-sm text-muted-foreground">Ainda não há movimentações neste turno.</p>}
-            </section>
-          </div>}
-        </SheetContent>
-      </Sheet>
-      <MovementDialog kind="sangria" open={modal === "sangria"} onClose={() => onModalChange(null)} onDone={data.reload} />
-      <MovementDialog kind="suprimento" open={modal === "suprimento"} onClose={() => onModalChange(null)} onDone={data.reload} />
-      <ClosingDialog open={modal === "fechamento"} onClose={() => onModalChange(null)} onDone={data.reload} />
-    </div>
-  )
+function ShiftDetails({ record: r, onReceipt }: { record: RecordShift; onReceipt: () => void }) {
+  const supply = r.movements.filter(m => m.type === "SUPPLY").reduce((a,m) => a + m.amount, 0), withdrawal = r.movements.filter(m => m.type === "BLEED_SANGRIA").reduce((a,m) => a + m.amount, 0)
+  return <><div className="border-b px-6 py-5"><div className="flex items-start justify-between gap-3"><div><h2 className="font-semibold">Detalhes do caixa</h2><p className="mt-1 text-xs text-muted-foreground">{r.status === "OPEN" ? "Turno em andamento" : "Resumo do turno selecionado"}</p></div><StatusBadge tone={r.status === "OPEN" ? "success" : "neutral"} icon={r.status === "OPEN" ? "check-circle" : "lock"} className="font-sans normal-case">{r.status === "OPEN" ? "Aberto" : "Fechado"}</StatusBadge></div></div><div className="max-h-[calc(100vh-180px)] space-y-6 overflow-y-auto px-6 py-5"><dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">{[["Operador",r.operator],["Caixa",r.terminal],["Abertura",dateTime(r.openedAt)],["Fechamento",dateTime(r.closedAt)],["Fundo inicial",brl(r.initial)],["Dinheiro esperado",brl(r.expected.cash)]].map(([k,v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="mt-1 font-medium">{v}</dd></div>)}</dl><div className="border-t pt-5"><h3 className="text-sm font-semibold">Vendas por pagamento</h3><p className="mt-1 text-xs text-muted-foreground">Dinheiro recebido em vendas; demais valores por modalidade.</p><div className="mt-4 space-y-3 text-sm">{paymentNames.map(({key,label}) => <div key={key} className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-medium tabular-nums">{brl(key === "cash" ? Math.max(0, r.expected.cash - r.initial - supply + withdrawal) : r.expected[key])}</span></div>)}</div></div><div className="border-t pt-5"><h3 className="text-sm font-semibold">Movimentações</h3><div className="mt-3 flex justify-between text-sm"><span className="text-muted-foreground">Suprimentos</span><span>{brl(supply)}</span></div><div className="mt-3 flex justify-between text-sm"><span className="text-muted-foreground">Sangrias</span><span>{brl(withdrawal)}</span></div><ul className="mt-3 divide-y">{r.movements.slice().reverse().map(m => <li key={m.id} className="flex justify-between gap-3 py-3 text-xs"><div><p className="font-medium">{labels[m.type] || "Movimentação"}</p><p className="mt-1 text-muted-foreground">{m.description} · {dateTime(m.createdAt)}</p></div><span className="shrink-0 tabular-nums">{m.type === "BLEED_SANGRIA" ? "−" : "+"} {brl(m.amount)}</span></li>)}</ul></div>{r.counted && <div className="space-y-3 border-t pt-5"><h3 className="text-sm font-semibold">Conferência do fechamento</h3>{paymentNames.map(({key,label}) => <div key={key} className="flex justify-between gap-2 text-xs"><span className="text-muted-foreground">{label} · esperado / informado</span><span className="tabular-nums">{brl(r.expected[key])} / {brl(r.counted![key])}</span></div>)}<p className="rounded-lg bg-muted/50 p-3 text-sm font-semibold">{differenceText(r.counted.cash - r.expected.cash)}</p>{r.observation && <p className="text-xs text-muted-foreground">Observação: {r.observation}</p>}<Button variant="outline" className="w-full" onClick={onReceipt}>Ver comprovante</Button></div>}</div></>
 }
 
-const MOVEMENT_COPY = {
-  sangria: {
-    type: "BLEED_SANGRIA",
-    title: "Realizar Sangria de Caixa",
-    icon: "arrow-down",
-    amountLabel: "Valor a Retirar (R$):",
-    amountPlaceholder: "50,00",
-    descLabel: "Motivo / Justificativa da Sangria:",
-    descPlaceholder: "Ex: Recolhimento para o cofre",
-    confirm: "Confirmar Sangria",
-    missing: "Informe o valor e a justificativa da sangria!",
-    success: (v: number) => `Sangria de ${brl(v)} realizada com sucesso!`,
-    destructive: true,
-  },
-  suprimento: {
-    type: "SUPPLY",
-    title: "Realizar Suprimento de Caixa",
-    icon: "arrow-up",
-    amountLabel: "Valor a Inserir (R$):",
-    amountPlaceholder: "100,00",
-    descLabel: "Justificativa / Origem:",
-    descPlaceholder: "Ex: Reforço de moedas para troco",
-    confirm: "Confirmar Suprimento",
-    missing: "Informe o valor e a justificativa do suprimento!",
-    success: (v: number) => `Suprimento de ${brl(v)} adicionado ao caixa!`,
-    destructive: false,
-  },
-} as const
-
-function MovementDialog({
-  kind,
-  open,
-  onClose,
-  onDone,
-}: {
-  kind: "sangria" | "suprimento"
-  open: boolean
-  onClose: () => void
-  onDone: () => Promise<void>
-}) {
-  const copy = MOVEMENT_COPY[kind]
-  const [amount, setAmount] = useState("")
-  const [description, setDescription] = useState("")
-
-  async function submit() {
-    const value = Number(amount)
-    if (!value || value <= 0 || !description.trim()) {
-      alert(copy.missing)
-      return
-    }
-    try {
-      await api.movement({ type: copy.type, amount: value, description: description.trim() })
-      setAmount("")
-      setDescription("")
-      onClose()
-      await onDone()
-      alert(copy.success(value))
-    } catch (e) {
-      alert((e as Error).message)
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <GlIcon name={copy.icon} /> {copy.title}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 text-xs">
-          <div className="space-y-1">
-            <Label htmlFor={`${kind}-amount`}>{copy.amountLabel}</Label>
-            <Input
-              id={`${kind}-amount`}
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={copy.amountPlaceholder}
-              className="font-mono font-bold"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor={`${kind}-desc`}>{copy.descLabel}</Label>
-            <Input
-              id={`${kind}-desc`}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={copy.descPlaceholder}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant={copy.destructive ? "destructive" : "default"} onClick={() => void submit()}>
-            {copy.confirm}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+function OpeningDialog({ open, onClose, onDone }: { open: boolean; onClose: () => void; onDone: () => Promise<void> }) {
+  const [operator,setOperator] = useState(""); const [amount,setAmount] = useState(""); const [error,setError] = useState(""); const [busy,setBusy] = useState(false)
+  async function submit() { if (!operator.trim() || amount === "" || !Number.isFinite(Number(amount)) || Number(amount) < 0) { setError("Informe o operador e um valor inicial válido."); return } setBusy(true); setError(""); try { await api.openShift({operatorName: operator.trim(), initialCash: Number(amount), terminalId:"CAIXA-BALCAO-01"}); await onDone(); setOperator(""); setAmount(""); onClose() } catch { setError("Não foi possível abrir o caixa. Verifique a conexão e tente novamente.") } finally { setBusy(false) } }
+  return <Dialog open={open} onOpenChange={v => { if (!v) { setError(""); onClose() } }}><DialogContent><DialogHeader><DialogTitle>Abrir caixa</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">Informe quem vai operar o caixa e o valor inicial para troco.</p><div className="space-y-4"><div className="space-y-2"><Label htmlFor="open-operator">Operador</Label><Input id="open-operator" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Nome do operador" /></div><div className="space-y-2"><Label htmlFor="open-amount">Fundo inicial (R$)</Label><Input id="open-amount" type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0,00" /></div>{error && <p role="alert" className="text-sm text-destructive">{error}</p>}</div><DialogFooter><Button variant="outline" onClick={onClose}>Cancelar</Button><Button disabled={busy} onClick={() => void submit()}>Confirmar abertura</Button></DialogFooter></DialogContent></Dialog>
 }
 
-const CLOSING_FIELDS = [
-  { key: "declaredCash", label: "Dinheiro Contado (Gaveta):" },
-  { key: "declaredDebit", label: "Cartão Débito:" },
-  { key: "declaredCredit", label: "Cartão Crédito:" },
-  { key: "declaredPix", label: "Pix Recebido:" },
-] as const
-
-function ClosingDialog({
-  open,
-  onClose,
-  onDone,
-}: {
-  open: boolean
-  onClose: () => void
-  onDone: () => Promise<void>
-}) {
-  const [values, setValues] = useState<Record<string, string>>({})
-
-  async function submit() {
-    const declared = Object.fromEntries(
-      CLOSING_FIELDS.map((f) => [f.key, Number(values[f.key] || 0)]),
-    )
-    try {
-      const closed = await api.closeShift(declared)
-      onClose()
-      await onDone()
-      const diff = closed.cashDifference
-      const diffMsg =
-        diff === 0
-          ? "Caixa bateu perfeitamente!"
-          : diff > 0
-            ? `Sobra de caixa: ${brl(diff)}`
-            : `Quebra de caixa: ${brl(Math.abs(diff))}`
-      alert(
-        `Turno Fechado com Sucesso!\n\nRelatório Z emitido.\nTotal Declarado em Dinheiro: ${brl(declared.declaredCash)}\nSaldo Calculado: ${brl(closed.finalCalculatedCash)}\n${diffMsg}`,
-      )
-    } catch (e) {
-      alert((e as Error).message)
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <GlIcon name="lock" /> Conferência de Fechamento de Caixa
-          </DialogTitle>
-        </DialogHeader>
-        <p className="text-xs text-muted-foreground">
-          Insira a contagem física do operador para conferência cega:
-        </p>
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          {CLOSING_FIELDS.map((f) => (
-            <div key={f.key} className="space-y-1 rounded-xl border bg-background p-3">
-              <Label htmlFor={f.key}>{f.label}</Label>
-              <Input
-                id={f.key}
-                type="number"
-                placeholder="0,00"
-                value={values[f.key] ?? ""}
-                onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                className="font-mono font-bold"
-              />
-            </div>
-          ))}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button className="font-extrabold" onClick={() => void submit()}>
-            Emitir Relatório Z &amp; Fechar Turno
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+function ClosingDialog({ open, record, onClose, onDone }: { open: boolean; record: RecordShift; onClose: () => void; onDone: (record: RecordShift) => Promise<void> }) {
+  const [values,setValues] = useState<Record<keyof Totals,string>>({cash:"",pix:"",credit:"",debit:""}); const [step,setStep] = useState<"count"|"review">("count"); const [observation,setObservation] = useState(""); const [error,setError] = useState(""); const [busy,setBusy] = useState(false)
+  const counted = Object.fromEntries(paymentNames.map(({key}) => [key, Number(values[key])])) as Totals
+  function close() { setStep("count"); setError(""); onClose() }
+  function review() { if (paymentNames.some(({key}) => values[key] === "" || !Number.isFinite(Number(values[key])) || Number(values[key]) < 0)) { setError("Preencha todos os valores com números válidos. Use zero quando necessário."); return } setError(""); setStep("review") }
+  async function finish() { setBusy(true); setError(""); try { const result = await api.closeShift({ declaredCash: counted.cash, declaredPix: counted.pix, declaredCredit: counted.credit, declaredDebit: counted.debit }); const closed: RecordShift = { ...record, id: `turno-${Date.now()}`, status:"CLOSED", closedAt:new Date().toISOString(), expected: { ...record.expected, cash: result.finalCalculatedCash }, counted, observation:observation.trim() }; close(); await onDone(closed); setValues({cash:"",pix:"",credit:"",debit:""}); setObservation("") } catch { setError("Não foi possível fechar o turno. Tente novamente.") } finally { setBusy(false) } }
+  return <Dialog open={open} onOpenChange={v => { if (!v) close() }}><DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto"><DialogHeader><DialogTitle>{step === "count" ? "Conferir caixa" : "Resumo do fechamento"}</DialogTitle></DialogHeader>{step === "count" ? <><p className="text-sm text-muted-foreground">Informe os valores contados para conferir o turno.</p><div className="grid grid-cols-2 gap-4">{paymentNames.map(({key,label}) => <div key={key} className="space-y-2"><Label htmlFor={`count-${key}`}>{label} (R$)</Label><Input id={`count-${key}`} type="number" min="0" step="0.01" value={values[key]} onChange={e => setValues(v => ({...v,[key]:e.target.value}))} placeholder="0,00" /></div>)}</div></> : <><p className="text-sm text-muted-foreground">Confira os valores antes de confirmar o fechamento.</p><div className="space-y-3 rounded-lg border p-4">{paymentNames.map(({key,label}) => <div key={key} className="flex justify-between gap-4 text-sm"><span>{label}</span><span className="text-right text-muted-foreground">Esperado {brl(record.expected[key])} · Informado {brl(counted[key])}</span></div>)}</div><p className="rounded-lg bg-muted/50 p-3 text-sm font-semibold">{differenceText(counted.cash - record.expected.cash)}</p><div className="space-y-2"><Label htmlFor="close-observation">Observação (opcional)</Label><textarea id="close-observation" className="min-h-20 w-full rounded-lg border bg-background p-3 text-sm" value={observation} onChange={e => setObservation(e.target.value)} placeholder="Adicione uma observação sobre a conferência" /></div></>}{error && <p role="alert" className="text-sm text-destructive">{error}</p>}<DialogFooter><Button variant="outline" onClick={() => step === "review" ? setStep("count") : close()}>{step === "review" ? "Voltar" : "Cancelar"}</Button>{step === "count" ? <Button onClick={review}>Conferir valores</Button> : <Button disabled={busy} onClick={() => void finish()}>Confirmar fechamento</Button>}</DialogFooter></DialogContent></Dialog>
 }
