@@ -67,6 +67,9 @@ export interface CashMovement {
 }
 
 export interface Shift {
+  terminalId?: string
+  operatorName?: string
+  openedAt?: string
   finalCalculatedCash: number
   movements: CashMovement[]
   reconciliation: { method: string; systemCalculatedAmount: number }[]

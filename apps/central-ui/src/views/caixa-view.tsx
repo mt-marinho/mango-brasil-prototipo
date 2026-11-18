@@ -1,7 +1,6 @@
 import { useState } from "react"
 
 import { GlIcon } from "@/components/gl-icon"
-import { MetricCard } from "@/components/page-header"
 import { StatusBadge } from "@/components/status-badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,138 +24,122 @@ import { api } from "@/lib/api"
 import { brl } from "@/lib/format"
 import type { CentralData } from "@/lib/use-central-data"
 
-type Modal = null | "sangria" | "suprimento" | "fechamento"
+export type CashModal = null | "sangria" | "suprimento" | "fechamento"
 
-export function CaixaView({ data }: { data: CentralData }) {
-  const [modal, setModal] = useState<Modal>(null)
+const MOVEMENT_LABELS: Record<string, { label: string; icon: string; tone: "success" | "danger" | "info" }> = {
+  INITIAL_SUPPLY: { label: "Abertura", icon: "arrow-up", tone: "success" },
+  SUPPLY: { label: "Suprimento", icon: "arrow-up", tone: "success" },
+  BLEED_SANGRIA: { label: "Sangria", icon: "arrow-down", tone: "danger" },
+  ORDER_PAYMENT: { label: "Venda", icon: "credit-card", tone: "info" },
+}
+
+export function CaixaView({ data, modal, onModalChange }: {
+  data: CentralData
+  modal: CashModal
+  onModalChange: (modal: CashModal) => void
+}) {
   const shift = data.shift
-
+  const movements = shift?.movements ?? []
   const reconciled = (method: string) =>
     shift?.reconciliation.find((r) => r.method === method)?.systemCalculatedAmount ?? 0
   const cardTotal = reconciled("CREDIT_CARD") + reconciled("DEBIT_CARD")
+  const opened = shift?.openedAt
+    ? new Date(shift.openedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+    : null
+
+  const metrics = [
+    { label: "Dinheiro em caixa", value: shift ? brl(shift.finalCalculatedCash) : "—", hint: "Saldo atual em dinheiro" },
+    { label: "Vendas no cartão", value: shift ? brl(cardTotal) : "—", hint: "Crédito e débito" },
+    { label: "Vendas em Pix", value: shift ? brl(reconciled("PIX")) : "—", hint: "Pagamentos recebidos" },
+  ]
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <MetricCard
-          label="Saldo Atual em Dinheiro"
-          value={brl(shift?.finalCalculatedCash ?? 0)}
-          valueClassName="text-success"
-          hint="Terminal: CAIXA-BALCAO-01"
-        />
-        <MetricCard
-          label="Vendas no Cartão (Créd/Déb)"
-          value={brl(cardTotal)}
-          valueClassName="text-info"
-          hint="Via TEF / Pinpad integrado"
-        />
-        <MetricCard
-          label="Vendas em Pix"
-          value={brl(reconciled("PIX"))}
-          valueClassName="text-chart-4"
-          hint="QR Code dinâmico"
-        />
-        <div className="space-y-1 rounded-2xl border bg-card p-4">
-          <span className="text-xs font-bold text-muted-foreground uppercase">Status do Turno</span>
-          <div className="pt-1">
-            {shift ? (
-              <StatusBadge tone="success" icon="status_success" className="h-7 text-sm">
-                ABERTO
-              </StatusBadge>
-            ) : (
-              <StatusBadge tone="neutral" icon="lock" className="h-7 text-sm">
-                FECHADO
-              </StatusBadge>
-            )}
+    <div className="mx-auto max-w-[1600px] space-y-6">
+      <section aria-labelledby="cash-overview-title" className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 id="cash-overview-title" className="text-xl font-bold tracking-tight">Turno atual</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Acompanhe os valores e as movimentações do caixa.</p>
           </div>
-          <p className="text-[11px] text-muted-foreground">
-            {shift ? "Turno em andamento" : "Nenhum turno aberto"}
-          </p>
+          <StatusBadge tone={shift ? "success" : "neutral"} icon={shift ? "check-circle" : "lock"} className="h-7 font-sans text-xs font-semibold">
+            {shift ? "Turno aberto" : "Turno fechado"}
+          </StatusBadge>
         </div>
-      </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card p-4">
-        <div className="flex items-center gap-2">
-          <Button variant="destructive" onClick={() => setModal("sangria")}>
-            <GlIcon name="arrow-down" /> Realizar Sangria de Caixa
-          </Button>
-          <Button
-            variant="outline"
-            className="border-success/30 bg-success/10 text-success hover:bg-success/20"
-            onClick={() => setModal("suprimento")}
-          >
-            <GlIcon name="arrow-up" /> Realizar Suprimento de Caixa
-          </Button>
+        {shift && (opened || shift.operatorName) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {opened && <span>Aberto em {opened}</span>}
+            {opened && shift.operatorName && <span aria-hidden="true">·</span>}
+            {shift.operatorName && <span>Operador: {shift.operatorName}</span>}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {metrics.map((metric) => (
+            <div key={metric.label} className="rounded-xl border bg-card px-5 py-4">
+              <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+              <p className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">{metric.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{metric.hint}</p>
+            </div>
+          ))}
         </div>
-        <Button className="font-extrabold" onClick={() => setModal("fechamento")}>
-          <GlIcon name="lock" /> Fechar Turno com Conferência (Relatório Z)
-        </Button>
-      </div>
+      </section>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <div className="flex items-center justify-between border-b p-4 text-sm font-bold">
-          <span>Histórico de Movimentações do Turno</span>
-          <span className="font-mono text-xs font-normal text-muted-foreground">
-            Auditoria Contábil
+      <section aria-labelledby="cash-movements-title" className="overflow-hidden rounded-xl border bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
+          <div>
+            <h2 id="cash-movements-title" className="text-base font-semibold">Movimentações do turno</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Histórico de entradas, retiradas e vendas do caixa.</p>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {movements.length === 1 ? "1 movimentação" : movements.length + " movimentações"}
           </span>
         </div>
-        <Table className="font-mono text-xs">
+        <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Horário</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Descrição / Motivo</TableHead>
-              <TableHead>Operador</TableHead>
-              <TableHead className="text-right">Valor</TableHead>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="h-11 pl-5 text-xs text-muted-foreground">Horário</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Tipo</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Descrição</TableHead>
+              <TableHead className="text-xs text-muted-foreground">Operador</TableHead>
+              <TableHead className="pr-5 text-right text-xs text-muted-foreground">Valor</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(shift?.movements ?? [])
-              .slice()
-              .reverse()
-              .map((m) => {
-                const sangria = m.type === "BLEED_SANGRIA"
-                const suprimento = m.type === "SUPPLY" || m.type === "INITIAL_SUPPLY"
-                return (
-                  <TableRow key={m.id}>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(m.createdAt).toLocaleTimeString()}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge
-                        tone={sangria ? "danger" : suprimento ? "success" : "info"}
-                        icon={sangria ? "arrow-down" : suprimento ? "arrow-up" : "credit-card"}
-                      >
-                        {m.type}
-                      </StatusBadge>
-                    </TableCell>
-                    <TableCell className="font-sans">{m.description}</TableCell>
-                    <TableCell className="font-sans text-muted-foreground">{m.operatorName}</TableCell>
-                    <TableCell
-                      className={`text-right font-bold ${sangria ? "text-destructive" : "text-success"}`}
-                    >
-                      {sangria ? "-" : "+"} {brl(m.amount)}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+            {movements.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="px-5 py-10 text-center text-sm text-muted-foreground">
+                  {shift ? "Ainda não há movimentações neste turno." : "Não há turno aberto no momento."}
+                </TableCell>
+              </TableRow>
+            ) : movements.slice().reverse().map((movement) => {
+              const config = MOVEMENT_LABELS[movement.type] ?? { label: "Movimentação", icon: "doc-text", tone: "info" as const }
+              const sangria = movement.type === "BLEED_SANGRIA"
+              return (
+                <TableRow key={movement.id}>
+                  <TableCell className="py-4 pl-5 text-sm text-muted-foreground tabular-nums">
+                    {new Date(movement.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge tone={config.tone} icon={config.icon} className="font-sans text-xs font-medium normal-case">
+                      {config.label}
+                    </StatusBadge>
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate text-sm" title={movement.description}>{movement.description}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{movement.operatorName}</TableCell>
+                  <TableCell className="pr-5 text-right text-sm font-semibold tabular-nums">
+                    {sangria ? "−" : "+"} {brl(movement.amount)}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
-      </div>
+      </section>
 
-      <MovementDialog
-        kind="sangria"
-        open={modal === "sangria"}
-        onClose={() => setModal(null)}
-        onDone={data.reload}
-      />
-      <MovementDialog
-        kind="suprimento"
-        open={modal === "suprimento"}
-        onClose={() => setModal(null)}
-        onDone={data.reload}
-      />
-      <ClosingDialog open={modal === "fechamento"} onClose={() => setModal(null)} onDone={data.reload} />
+      <MovementDialog kind="sangria" open={modal === "sangria"} onClose={() => onModalChange(null)} onDone={data.reload} />
+      <MovementDialog kind="suprimento" open={modal === "suprimento"} onClose={() => onModalChange(null)} onDone={data.reload} />
+      <ClosingDialog open={modal === "fechamento"} onClose={() => onModalChange(null)} onDone={data.reload} />
     </div>
   )
 }
@@ -169,7 +152,7 @@ const MOVEMENT_COPY = {
     amountLabel: "Valor a Retirar (R$):",
     amountPlaceholder: "50,00",
     descLabel: "Motivo / Justificativa da Sangria:",
-    descPlaceholder: "Ex: Pagamento fornecedor pães / Recolhimento cofre",
+    descPlaceholder: "Ex: Recolhimento para o cofre",
     confirm: "Confirmar Sangria",
     missing: "Informe o valor e a justificativa da sangria!",
     success: (v: number) => `Sangria de ${brl(v)} realizada com sucesso!`,
