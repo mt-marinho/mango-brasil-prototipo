@@ -87,7 +87,7 @@ export function KdsView({ data }: { data: CentralData }) {
                     <p className="text-xs font-medium text-muted-foreground">Pedido</p>
                     <h2 className="mt-1 text-xl font-semibold tracking-tight tabular-nums">#{order.publicTicketNumber}</h2>
                   </div>
-                  <StatusBadge tone={status.tone} icon={status.icon} className="h-7 font-sans text-xs font-medium normal-case">
+                  <StatusBadge tone={status.tone} icon={status.icon} className={cn("h-7 font-sans text-xs font-medium normal-case", order.status === "PREPARING" && "bg-primary/15 text-primary dark:text-primary")}>
                     {order.status === "RECEIVED" ? "Aguardando" : order.status === "PREPARING" ? "Em preparo" : order.status === "READY" ? "Pronto" : status.label}
                   </StatusBadge>
                 </div>
@@ -115,7 +115,7 @@ export function KdsView({ data }: { data: CentralData }) {
                     {errors[order.id] && <p role="alert" className="mb-2 text-xs text-destructive">{errors[order.id]}</p>}
                     <Button
                       variant={order.status === "READY" ? "secondary" : "default"}
-                      className={cn("h-10 w-full font-medium", order.status === "PREPARING" && "bg-success text-black hover:bg-success/80")}
+                      className="h-10 w-full font-medium"
                       disabled={pending[order.id]}
                       onClick={() => void advance(order.id, action.next)}
                     >
